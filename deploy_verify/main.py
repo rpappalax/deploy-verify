@@ -144,7 +144,7 @@ def stack_check(args=None):
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
     parser.add_argument('-a','--application',
-                help='Enter: loop-server, loop-client',
+                help='Enter: loop-server, loop-client, etc.',
                 default='loop-server',
                 required=True)
     parser.add_argument('-r','--region',

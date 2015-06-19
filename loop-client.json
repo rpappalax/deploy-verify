@@ -13,6 +13,7 @@
 	    "loop_server": "loop.services.mozilla.com"
 	}
     },
+    "protocols" : [ "http", "https" ],
     "processes" : [ "loop", "node", "datadog", "circus", "heka", "nginx" ],
     "commands" : {
         "curl -I": [ "<root>" ]

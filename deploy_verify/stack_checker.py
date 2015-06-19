@@ -13,25 +13,6 @@ class FabricException(Exception):
     pass
 
 class StackChecker(object):
-    """
-    TODO:
-     - call vers.json
-     - add stack information from boto
-     - loop-client returns 3 instances with matching version - reduce to latest,
-       match github commit hash
-     - check vers.json info agains github
-     - verify matching tag number (use github api lib for this)
-     - bugzilla: create bug search filter to grab lastest deployment ticker for a 
-       given product, release, env combination
-     - http redirect to https for loop-server?
-     - loop / node processes not running for loop-client?
-
-     LOADTEST
-     - yes we have some stack checking we might do after a loadtest only
-     - or before  and after, such as:  disk space, log check, etc.
-     - if verify processes, then run grep on access logs?
-
-    """
 
     def __init__(
         self, jump_host_uri, application, tag_num, environment, host_string):
