@@ -1,6 +1,0 @@
-[console_scripts]
-stack-check = deploy_verify.main:stack_check
-e2e = deploy_verify.main:e2e_test
-ticket = deploy_verify.main:ticket
-loadtest = deploy_verify.main:loadtest
-

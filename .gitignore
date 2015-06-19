@@ -2,6 +2,7 @@
 *.sw[lmnopqr]
 .Python
 venv/
+*.egg*
 *.py[cod]
 *.stamp
 .venv/
