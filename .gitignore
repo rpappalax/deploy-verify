@@ -1,0 +1,9 @@
+.DS_Store
+*.sw[lmnopqr]
+.Python
+venv/
+*.py[cod]
+*.stamp
+.venv/
+.tox/
+

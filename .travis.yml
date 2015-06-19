@@ -1,0 +1,15 @@
+language: python
+python: 2.7
+sudo: false
+env:
+    - TOX_ENV=py27
+    - TOX_ENV=py33
+    - TOX_ENV=flake8
+    global:
+        - secure: access_token=XXXXX
+install:
+    - pip install tox
+script:
+    - tox -e $TOX_ENV
+notifications:
+    irc: "irc.freenode.org#rpappalax"

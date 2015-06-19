@@ -1,0 +1,20 @@
+{
+    "urls" : {
+	"stage": {
+	    "root" : "call.stage.mozaws.net",
+            "config.js" : "hello.firefox.com/config.js",
+	    "push_config" : "loop.stage.mozaws.net/push-server-config",
+	    "loop_server": "loop.stage.mozaws.net"
+	},
+	"prod": {
+	    "root": "hello.firefox.com",
+            "config.js" : "call.stage.mozaws.net/config.js",
+	    "push_config" : "loop.services.mozilla.com/push-server-config",
+	    "loop_server": "loop.services.mozilla.com"
+	}
+    },
+    "processes" : [ "loop", "node", "datadog", "circus", "heka", "nginx" ],
+    "commands" : {
+        "curl -I": [ "<root>" ]
+    }
+}
