@@ -15,7 +15,7 @@ class FabricException(Exception):
 class StackChecker(object):
 
     def __init__(
-        self, jump_host_uri, application, tag_num, environment, host_string):
+        self, jump_host_uri, application, tag_num, env_selected, host_string):
         
         # Fabric settings
         env.gateway = jump_host_uri
@@ -28,7 +28,7 @@ class StackChecker(object):
 
         self.application = application 
         self.tag_num = tag_num 
-        self.environment = environment
+        self.env_selected = env_selected
     
     def _test_manifest(self, application):
 
@@ -43,15 +43,16 @@ class StackChecker(object):
         label = 'STACK CHECK {0}'.format(env)
         return '{0}\n{1}\n{2}\n\n'.format(LINE, label, LINE)
 
-    def _urls(self, manifest):
+    def _urls(self, manifest, env):
 
-        env = 'stage'
+        #env = 'stage'
+        env= env.lower()
         protocols = ['https']
         # TODO: http - need failure check
         # http redirects for loop-client, but not for loop-server
         #protocols = ['http', 'https']
         urls = []
-        for key, val in manifest["urls"][env].iteritems():
+        for key, val in manifest["envs"][env]["urls"].iteritems():
             for protocol in protocols:
                 urls.append('{0}://{1}'.format(protocol, val))
         return urls
@@ -140,7 +141,7 @@ class StackChecker(object):
         param = re.search(r'<(.*)>', val)
         if param:
             key_substitute = param.group(1)
-            val = manifest["urls"][env][key_substitute]
+            val = manifest["envs"][env]["urls"][key_substitute]
             val = 'https://{}'.format(val)
         return val
 
@@ -206,11 +207,22 @@ class StackChecker(object):
         out += run(cmd) + '\n\n'
         return out
 
-    def diskspace(self):
+    def verify_urls(self, urls):
 
-        return run('df')
+        out = ''
+        for url in urls:
+            #TODO: iterate thru protocols
+            out += '{0}:\n'.format(url)
+            out += str(self._http_request(url))
+        return out + '\n\n'
+
+    def diskspace(self):
+        # TODO: [loadtest] before / after
+
+        return run('df') + '\n\n'
 
     def verify_access_logs(self):
+        # TODO: [loadtest] before / after
 
         out = 'TBD'
         # look for 5XXs - FAIL
@@ -219,41 +231,38 @@ class StackChecker(object):
         # cat /media/ephemeral0/nginx/logs/loop_server.access.log | grep "HTTP/" | awk '{print $6" "$3" "}' | sort | uniq -c
         return out
 
-    def verify_urls(self, urls):
-
-        out = ''
-        for url in urls:
-            print url
-            out += '{0}:\n'.format(url)
-            out += str(self._http_request(url))
-        return out + '\n'
-
-
     def main(self):
 
-        # TODO: set env
+        out = ''
+        env_selected = self.env_selected.lower()
+
         manifest = self._test_manifest(self.application)
+        envs = manifest["envs"]
 
-        environment = self.environment
-        out = self._header_label(environment)
-        #out += 'RPM INFO\n'
-        #out += str(self.get_rpm_qa())
+        # we need to repeat these if we have multipe stage servers
 
-        out += 'PACKAGE VERSION\n\n'
-        out += str(self.package_version())
- 
-        if 'processes' in manifest:
-            out += 'PROCESS CHECK\n\n'
-            out += str(self.verify_processes(manifest))
+        for env in envs:
+            if env_selected in env:
 
-        out += 'URL CHECK\n\n'
-        urls = self._urls(manifest)
-        out += self.verify_urls(urls)
+                out += self._header_label(env)
+                #out += 'RPM INFO\n'
+                #out += str(self.get_rpm_qa())
 
-        out += str(self.verify_commands(manifest, environment))
-        
-        out += 'DISK SPACE\n\n'
-        out += self.diskspace()
+                out += 'PACKAGE VERSION\n\n'
+                out += str(self.package_version())
+         
+                if 'processes' in manifest:
+                    out += 'PROCESS CHECK\n\n'
+                    out += str(self.verify_processes(manifest))
+
+                out += 'URL CHECK\n\n'
+                urls = self._urls(manifest, env)
+                out += self.verify_urls(urls)
+
+                out += str(self.verify_commands(manifest, env))
+                
+                out += 'DISK SPACE\n\n'
+                out += self.diskspace()
         return out 
 
 if __name__ == '__main__':
