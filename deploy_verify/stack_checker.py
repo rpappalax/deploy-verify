@@ -161,7 +161,7 @@ class StackChecker(object):
                 out += '$ {}:\n'.format(cmd)
                 out += run(cmd)
                 out = "".join([s for s in out.strip().splitlines(True) if s.strip("\r\n")])
-        return out
+        return '{0}\n\n\n'.format(out)
 
     def verify_processes(self, manifest):
         """
