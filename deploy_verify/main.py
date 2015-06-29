@@ -209,9 +209,10 @@ def stack_check(args=None):
 
     for instance in instances:
         host_string = instance.public_dns_name
+        instance_properties = ec2.instance_properties(region, instance)
 
-        check = StackChecker(
-            bastion_host_uri, application, tag_num, environment, host_string)
+        check = StackChecker(bastion_host_uri, application, 
+            tag_num, environment, host_string, instance_properties)
         result = check.main()
 
         comment = host_string

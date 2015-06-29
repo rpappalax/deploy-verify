@@ -9,6 +9,7 @@ REGIONS = [
     'us-east-1', 'us-west-1', 'us-west-2', 'eu-west-1', 'sa-east-1',
     'ap-southeast-1', 'ap-southeast-2', 'ap-northeast-1'
 ]
+LINE = '----------------------------'
 
 class EC2Handler(object):
 
@@ -38,11 +39,12 @@ class EC2Handler(object):
         
         return sorted(instances, key=attrgetter(sort_by))
 
-    def instance_report(self, region, instance):
+    def instance_properties(self, region, instance):
 
-        return 'region: {0}: \nid: {1} \ntags["Type"]: {2}  \
+        return 'EC2 INSTANCE PROPERTIES\n  \
+            \nregion: {0}: \nid: {1} \ntags["Type"]: {2}  \
             \ntags["AppGitRef"]: {3}\ntags["Stack"]: {4}\npublic_dns_name: {5} \
-            \nlaunch_time: {6}'.format(
+            \nlaunch_time: {6}\n'.format(
                 region, 
                 instance.id,
                 instance.tags['Type'],
@@ -77,7 +79,7 @@ def main():
         instances = ec2.instances_newest(region, filters)
         for instance in instances:
             print('--------------------')
-            print(ec2.instance_report(region, instance))
+            print(ec2.instance_properties(region, instance))
 
 
 if __name__ == '__main__':

@@ -14,8 +14,11 @@ class FabricException(Exception):
 
 class StackChecker(object):
 
-    def __init__(
-        self, jump_host_uri, application, tag_num, env_selected, host_string):
+    def __init__(self, jump_host_uri, application, tag_num, 
+            env_selected, host_string, instance_properties):
+
+        self.instance_properties = instance_properties
+        
         
         # Fabric settings
         env.gateway = jump_host_uri
@@ -158,7 +161,7 @@ class StackChecker(object):
                 out += '$ {}:\n'.format(cmd)
                 out += run(cmd)
                 out = "".join([s for s in out.strip().splitlines(True) if s.strip("\r\n")])
-        return out + '\n\n' 
+        return out
 
     def verify_processes(self, manifest):
         """
@@ -248,14 +251,16 @@ class StackChecker(object):
                 #out += 'RPM INFO\n'
                 #out += str(self.get_rpm_qa())
 
-                out += 'PACKAGE VERSION\n\n'
-                out += str(self.package_version())
+                out += '{0}\n\n'.format(self.instance_properties)
+
+                #out += 'PACKAGE VERSION\n\n'
+                #out += str(self.package_version())
          
                 if 'processes' in manifest:
                     out += 'PROCESS CHECK\n\n'
                     out += str(self.verify_processes(manifest))
 
-                out += 'URL CHECK\n\n'
+                out += 'URL CHECKS\n\n'
                 urls = self._urls(manifest, env)
                 out += self.verify_urls(urls)
 
