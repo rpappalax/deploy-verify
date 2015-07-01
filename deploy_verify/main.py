@@ -116,8 +116,10 @@ def ticket(args=None):
         release_num = notes.last_tag
         output.log('Release Notes', True)
         output.log(description)
+        product = repo
 
-        ticket.bug_create(release_num, repo, environment, status, description, cc_mail)
+        #ticket.bug_create(release_num, repo, environment, status, description, cc_mail)
+        ticket.bug_create(release_num, product, environment, status, description, cc_mail)
 
 def stack_check(args=None):
     """Verify newly deployed stack and update bug with verification results

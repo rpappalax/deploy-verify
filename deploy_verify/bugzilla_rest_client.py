@@ -12,6 +12,8 @@ from output_helper import OutputHelper
 
 URL_BUGZILLA_PROD = 'https://bugzilla.mozilla.org'
 URL_BUGZILLA_DEV = 'https://bugzilla-dev.allizom.org'
+PRODUCT_PROD = 'Cloud Services'
+PRODUCT_DEV = 'Mozilla Services'
 COMPONENT_PROD = 'Operations: Deployment Requests'
 COMPONENT_DEV = 'General'
 HEADERS = {'Content-type': 'application/json', 'Accept': 'text/plain'}
@@ -32,32 +34,22 @@ class BugzillaRESTClient(object):
         self.password = bugzilla_password
         self.token = self.get_token(host)
 
-    def _component(self, host):
-        """Return Bugzilla component as string
+        # bugzilla-dev doesn't mirror the same components, 
+        #so we'll populate these conditionally
+        self.bugzilla_product = PRODUCT_DEV if 'dev' in host else PRODUCT_PROD
+        self.bugzilla_component = COMPONENT_DEV if 'dev' in host else \
+            COMPONENT_PROD
 
-        Note:
-            bugzilla-dev doesn't mirror the same components, so
-            use 'General'
-        """
-
-        if 'dev' in host:
-            return COMPONENT_DEV
-        else:
-            return COMPONENT_PROD
-
-    def _get_json_create(
-        self, release_num, product, environment, status, description, cc_mail=''):
+    def _get_json_create(self, release_num, application,
+        environment, status, description, cc_mail=''):
         """Returns bugzilla JSON string to POST to REST API."""
 
-        component = self._component(self.host)
-        #short_desc = 'Please deploy {0} {1} to {2}'.format(
         short_desc = '[deployment] {0} {1} - {2}'.format(
-            product, release_num, environment)
+            application, release_num, environment)
 
         data = {
-            'product': 'Mozilla Services',
-            'component': 'General',
-            'component': component,
+            'product': self.bugzilla_product,
+            'component': self.bugzilla_component,
             'version': 'unspecified',
             'op_sys': 'All',
             'rep_platform': 'All',
@@ -73,13 +65,21 @@ class BugzillaRESTClient(object):
             )
         return data
 
-
     def _get_json_update(self, bug_id, comment):
         """Returns bugzilla JSON as string to PUT to REST API."""
 
         data = {
             'ids': [bug_id],
             'comment': comment
+        }
+        return data
+
+    def _get_json_search(self, summary):
+        """Returns bugzilla JSON as string to GET from REST API."""
+        data = {
+            'summary': summary,
+            'product': self.bugzilla_product, 
+            'component': self.bugzilla_component 
         }
         return data
 
@@ -110,8 +110,8 @@ class BugzillaRESTClient(object):
         else:
             return decoded['token']
 
-    def bug_create(
-            self, release_num, product, environment, status, description, cc_mail=''):
+    def bug_create(self, release_num, application, environment, 
+        status, description, cc_mail=''):
         """Create bugzilla bug with description
 
         Note:
@@ -125,11 +125,12 @@ class BugzillaRESTClient(object):
         Returns:
             json string to POST to REST API
         """
+        
 
         self.output.log('Creating new bug via bugzilla REST API...', True)
         url = '{0}/rest/bug?token={1}'.format(self.host, self.token)
-        data = self._get_json_create(
-            release_num, product, environment, status, description, cc_mail)
+        data = self._get_json_create(release_num, application,
+            environment, status, description, cc_mail)
 
         self.output.log(data)
 
@@ -151,38 +152,107 @@ class BugzillaRESTClient(object):
             json string to POST to REST API
         """
 
-        self.output.log('Updating bug #{0} via bugzilla REST API...'.format(bug_id), True)
-        url = '{0}/rest/bug/{1}/comment?token={2}'.format(self.host, bug_id, self.token)
-        data = self._get_json_update(bug_id, comment)
+        self.output.log(
+            'Updating bug #{0} via bugzilla REST API...'.format(bug_id), True)
+        url = '{0}/rest/bug/{1}/comment?token={2}'.format(
+            self.host, bug_id, self.token)
 
+        data = self._get_json_update(bug_id, comment)
         self.output.log(data)
 
         req = requests.post(url, data=json.dumps(data), headers=HEADERS)
         new_comment_id = req.json()['id']
 
         if new_comment_id:
-            self.output.log('\nComment created! - new comment ID: {0}\nDONE!\n\n'.format(new_comment_id))
+            self.output.log(
+                '\nComment created! - new comment ID: {0}\n \
+                DONE!\n\n'.format(new_comment_id))
         else:
-            self.output.log('\nERROR: Comment not created!\n\n'.format(new_comment_id))
+            self.output.log(
+                '\nERROR: Comment not created!\n\n'.format(new_comment_id))
            
         return new_comment_id
+
+    def _parse_bug(self, bug_json):
+        #bug = "bugs": [ { "id": 1234567 } ]
+        return '1234567' 
+
+    def _bug_latest_matching(self, json_bugs_matching):
+        """Returns bug id from bug with latest time stamp from 
+        json_search_results
+
+        Returns:
+            bug id as string 
+        """
+
+
+        self.output.log('Retrieve all matching bugs', True)
+
+        bugs_unsorted = []
+        bugs = json_bugs_matching["bugs"]
+
+        for i in range(len(bugs)):
+            id =  bugs[i]["id"]  
+            creation_time =  bugs[i]["creation_time"]  
+            bugs_unsorted.append([id, creation_time])
+
+        self.output.log(bugs_unsorted)
+        
+        self.output.log('Sort bugs by creation_time', True)
+        bugs_sorted = sorted(
+            bugs_unsorted, key=lambda bugs_sorted: bugs_sorted[1])
+
+        self.output.log(bugs_unsorted)
+        self.output.log('DONE!')
+
+        self.output.log('Get last bug from sorted list', True)
+        bug_latest = bugs_sorted[-1]
+
+        # return id only
+        return bug_latest[0]
+
+    def bug_search(self, summary):
+        """Search for bugzilla bugs matching summary string 
+
+        Returns:
+            json string to GET from REST API
+        """
+
+        self.output.log('Searching bugs with summary: {0} \n \
+            via bugzilla REST API...'.format(summary), True)
+        url = '{0}/rest/bug'.format(self.host)
+        
+        data = self._get_json_search(summary)
+        self.output.log(data)
+       
+        req = requests.get(url, params=data)
+        return self._bug_latest_matching(req.json())
 
 
 def main():
 
     bugzilla_username = 'johnnyquest@racebannon.com'
     bugzilla_password = 'hadji_is_a_geek'
-    ticket = BugzillaRESTClient(
-        URL_BUGZILLA_DEV, bugzilla_username, bugzilla_password)
+    url_bugzilla = URL_BUGZILLA_DEV
 
-    bug_info = {'release_num': '1.2.3',
-                'product': 'demo-server',
-                'environment': 'STAGE',
-                'status': 'NEW',
-                'description': 'Lorem ipsum dolor sit amet, \
-                ne dicat ancillae...'}
+    # Example: bug create
+    bz = BugzillaRESTClient(url_bugzilla, bugzilla_username, bugzilla_password)
 
-    print ticket.bug_create(**bug_info)
+    bug_info = {
+        'release_num': '1.2.3',
+        'application': 'Loop-Client',
+        'environment': 'STAGE',
+        'status': 'NEW',
+        'description': 'Lorem ipsum dolor sit amet, \
+        ne dicat ancillae...'
+    }
+    print bz.bug_create(**bug_info)
+
+    # Example: bug search 
+    search_info = {
+        'summary': 'Loop-Client'
+    }
+    print bz.bug_search(**search_info)
 
 
 if __name__ == '__main__':
