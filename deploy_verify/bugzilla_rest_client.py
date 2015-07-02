@@ -67,7 +67,7 @@ class BugzillaRESTClient(object):
             )
         return data
 
-    def _get_json_update(self, bug_id, comment):
+    def _get_json_update(self, comment, bug_id):
         """Returns bugzilla JSON as string to PUT to REST API."""
 
         data = {
@@ -149,20 +149,22 @@ class BugzillaRESTClient(object):
         self.output.log('\nNew bug ID: {0}\nDONE!\n\n'.format(new_bug_id))
         return new_bug_id
 
-    def bug_update(
-            self, bug_id, comment):
+    def bug_update(self, application, comment, bug_id=''):
         """Update bugzilla bug with new comment
 
         Returns:
             json string to POST to REST API
         """
 
+        if not bug_id:
+            bug_id = self.bug_search(application)
+
         self.output.log(
             'Updating bug #{0} via bugzilla REST API...'.format(bug_id), True)
         url = '{0}/rest/bug/{1}/comment?token={2}'.format(
             self.host, bug_id, self.token)
 
-        data = self._get_json_update(bug_id, comment)
+        data = self._get_json_update(comment, bug_id)
         self.output.log(data)
 
         req = requests.post(url, data=json.dumps(data), headers=HEADERS)
@@ -240,12 +242,11 @@ def main():
     bz = BugzillaRESTClient(url_bugzilla, bugzilla_username, bugzilla_password)
 
     bug_info = {
-        'release_num': '1.2.3',
+        'release_num': '0.18.0',
         'application': 'Loop-Client',
         'environment': 'STAGE',
         'status': 'NEW',
-        'description': 'Lorem ipsum dolor sit amet, \
-        ne dicat ancillae...'
+        'description': 'this release has been deployed to stage.'
     }
     print bz.bug_create(**bug_info)
 

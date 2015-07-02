@@ -63,6 +63,7 @@ bugzilla deployment tickets .
 
   -u BUGZILLA_USERNAME, --bugzilla-username BUGZILLA_USERNAME
   -p BUGZILLA_PASSWORD, --bugzilla-password BUGZILLA_PASSWORD
+  -r REPO, --repo REPO  Example: loop-server (default: None)
   -B, --bugzilla-mozilla
                         Add this option, and you'll post to
                         bugzilla.mozilla.org (not bugzilla-dev.allizom.or)
@@ -72,7 +73,6 @@ bugzilla deployment tickets .
 
   -o REPO_OWNER, --repo-owner REPO_OWNER
                         Example: mozilla-services
-  -r REPO, --repo REPO  Example: loop-server
   -e ENVIRONMENT, --environment ENVIRONMENT
                         Enter: STAGE, PROD
   -m CC_MAIL, --cc-mail CC_MAIL
@@ -101,7 +101,10 @@ Post to bugzilla-dev.allizom.org
   $ ticket -u johnny@quest.com -p password123 NEW -o mozilla-services -r loop-server -e STAGE 
 
   # Update an existing ticket with Bug ID = 1234567
-  $ ticket -u johnny@quest.com -p password123 UPDATE -i 1234567 -u "New comment here" 
+  $ ticket -u johnny@quest.com -p password123 -r loop-server UPDATE -i 1234567 -u "New comment here" 
+
+  # Update an the latest deployment ticket for <loop-server> (no Bug ID specified)
+  $ ticket -u johnny@quest.com -p password123 -r loop-server UPDATE -u "New comment here" 
 
 
 Post to bugzilla.mozilla.org (-B option) 

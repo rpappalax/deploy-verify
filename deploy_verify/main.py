@@ -28,6 +28,11 @@ def ticket(args=None):
         required=True)
 
     parser.add_argument(
+        '-r', '--repo',
+        help='Example: loop-server',
+        required=True)
+
+    parser.add_argument(
         '-B', '--bugzilla-mozilla',
         help='Set this switch to post directly to bugzilla.mozilla.org \
             (without switch posts to: bugzilla-dev.allizom.org)',
@@ -46,11 +51,6 @@ def ticket(args=None):
         help='Example: mozilla-services',
         default='mozilla-services',
         required=False)
-
-    parser_create.add_argument(
-        '-r', '--repo',
-        help='Example: loop-server',
-        required=True)
 
     parser_create.add_argument(
         '-e', '--environment',
@@ -73,7 +73,7 @@ def ticket(args=None):
     parser_update.add_argument(
         '-i', '--bug-id',
         help='Example: 1234567',
-        required=True)
+        required=False)
 
     parser_update.add_argument(
         '-c', '--comment',
@@ -84,6 +84,7 @@ def ticket(args=None):
 
     bugzilla_username = args['bugzilla_username']
     bugzilla_password = args['bugzilla_password']
+    repo = args['repo']
 
     if args['bugzilla_mozilla']:
         url_bugzilla = URL_BUGZILLA_PROD
@@ -99,11 +100,10 @@ def ticket(args=None):
         bug_id = args['bug_id']
         comment = args['comment']
 
-        ticket.bug_update(bug_id, comment)
+        ticket.bug_update(repo, comment, bug_id)
 
     if all(key in args for key in ['repo_owner', 'repo', 'environment']):
         repo_owner = args['repo_owner']
-        repo = args['repo']
         environment = args['environment']
         if args['cc_mail']:
             cc_mail = args['cc_mail']
@@ -179,7 +179,7 @@ def stack_check(args=None):
     parser.add_argument(
         '-i', '--deployment-ticket-id',
         help='Enter: 1234567',
-        required=True
+        required=False
     )
     parser.add_argument(
         '-u', '--bugzilla-username',
@@ -239,7 +239,7 @@ def stack_check(args=None):
             tag_num, environment, host_string, instance_properties
         )
         result = check.main()
-        ticket.bug_update(bug_id, result)
+        ticket.bug_update(result, bug_id)
 
 
 def loadtest(args=None):
