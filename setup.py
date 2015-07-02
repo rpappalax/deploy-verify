@@ -35,7 +35,7 @@ setup(
         'License :: OSI Approved :: Apache Software License',
     ],
     entry_points={
-        'console_scripts': [ 
+        'console_scripts': [
             'ticket = deploy_verify.main:ticket',
             'stack-check = deploy_verify.main:stack_check',
             'e2e = deploy_verify.main:e2e_test',

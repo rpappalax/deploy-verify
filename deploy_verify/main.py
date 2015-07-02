@@ -2,8 +2,8 @@ import os
 import argparse
 from deploy_verify.bugzilla_rest_client import BugzillaRESTClient
 from deploy_verify.release_notes import ReleaseNotes
-from deploy_verify.ec2_handler import EC2Handler 
-from deploy_verify.stack_checker import StackChecker 
+from deploy_verify.ec2_handler import EC2Handler
+from deploy_verify.stack_checker import StackChecker
 from output_helper import OutputHelper
 
 
@@ -18,7 +18,7 @@ def ticket(args=None):
         Bugzilla',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-    # parser for ticket - any option 
+    # parser for ticket - any option
     parser.add_argument(
         '-u', '--bugzilla-username',
         required=True)
@@ -38,8 +38,8 @@ def ticket(args=None):
     subparsers = parser.add_subparsers(help='Ticket action')
 
     # parser for ticket - {create} option
-    parser_create = subparsers.add_parser('NEW', 
-        help='Create a NEW deployment ticket.')
+    parser_create = \
+        subparsers.add_parser('NEW', help='Create a NEW deployment ticket.')
 
     parser_create.add_argument(
         '-o', '--repo-owner',
@@ -66,8 +66,10 @@ def ticket(args=None):
         required=False)
 
     # parser for ticket - {upate} option
-    parser_update = subparsers.add_parser('UPDATE', 
-        help='UPDATE an existing deployment ticket')
+    parser_update = subparsers.add_parser(
+        'UPDATE',
+        help='UPDATE an existing deployment ticket'
+    )
     parser_update.add_argument(
         '-i', '--bug-id',
         help='Example: 1234567',
@@ -84,22 +86,22 @@ def ticket(args=None):
     bugzilla_password = args['bugzilla_password']
 
     if args['bugzilla_mozilla']:
-        #TODO:
-        exit('REMOVE BEFORE MERGING!!!')
         url_bugzilla = URL_BUGZILLA_PROD
+        # REMOVE WHEN MERGING TO MASTER
+        exit()
     else:
         url_bugzilla = URL_BUGZILLA_DEV
 
     ticket = BugzillaRESTClient(
         url_bugzilla, bugzilla_username, bugzilla_password)
 
-    if all (key in args for key in ['bug_id','comment']):
+    if all(key in args for key in ['bug_id', 'comment']):
         bug_id = args['bug_id']
         comment = args['comment']
 
-        ticket.bug_update(bug_id, comment) 
+        ticket.bug_update(bug_id, comment)
 
-    if all (key in args for key in ['repo_owner', 'repo', 'environment']):
+    if all(key in args for key in ['repo_owner', 'repo', 'environment']):
         repo_owner = args['repo_owner']
         repo = args['repo']
         environment = args['environment']
@@ -116,27 +118,31 @@ def ticket(args=None):
         release_num = notes.last_tag
         output.log('Release Notes', True)
         output.log(description)
-        product = repo
 
-        #ticket.bug_create(release_num, repo, environment, status, description, cc_mail)
-        ticket.bug_create(release_num, product, environment, status, description, cc_mail)
+        ticket.bug_create(
+            release_num, repo, environment, status, description, cc_mail
+        )
+
 
 def stack_check(args=None):
     """Verify newly deployed stack and update bug with verification results
 
     TODO:
         Ops Jenkins must call stack-check with the id of the deployment bug.
+        We should add bug_search by default, then options below become
+        unnecessary
 
-        option #1: 
-            (implemented here) We grab the latest instance(s) and 
+        option #1:
+            (implemented here) We grab the latest instance(s) and
             assume that's the one we want to test
-        option #2:  
-            Ops Jenkins hands us off the DNS of the newly deployed stack 
+        option #2:
+            Ops Jenkins hands us off the DNS of the newly deployed stack
             as an input param
 
         From Ops Jenkins:
         /var/log/initial_puppet_apply.log
-        Sun Feb 01 10:57:55 +0000 2015 Puppet (notice): Finished catalog run in 422.65 seconds
+        Sun Feb 01 10:57:55 +0000 2015 Puppet (notice): Finished catalog run
+        in 422.65 seconds
         Jenkins will provide the host DNS as input param
         we need a static URL to reference stage.loop.mozaws.net
     """
@@ -145,37 +151,52 @@ def stack_check(args=None):
         description='Sanity check for basic stack deployment verification',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
 
-    parser.add_argument('-a','--application',
-                help='Enter: loop-server, loop-client, etc.',
-                default='loop-server',
-                required=True)
-    parser.add_argument('-r','--region',
-                help='Enter: eu-west-1, us-east-1',
-                default='eu-west-1',
-                required=True)
+    parser.add_argument(
+        '-a', '--application',
+        help='Enter: loop-server, loop-client, etc.',
+        default='loop-server',
+        required=True
+    )
+    parser.add_argument(
+        '-r', '--region',
+        help='Enter: eu-west-1, us-east-1',
+        default='eu-west-1',
+        required=True
+    )
     # Add as optional filter, without which we simply choose latest
     # We may also want to filter out a previous version
-    parser.add_argument('-t','--tag-num',
-                help='Enter: 0.17.2',
-                required=False)
     parser.add_argument(
-                '-e', '--environment',
-                help='Enter: STAGE, PRODUCTION',
-                default='STAGE',
-                required=False)
-    parser.add_argument('-i','--deployment-ticket-id',
-                help='Enter: 1234567',
-                required=True)
-    parser.add_argument('-u', '--bugzilla-username',
-                required=True)
-    parser.add_argument('-p', '--bugzilla-password',
-                required=True)
-    parser.add_argument('-B', '--bugzilla-mozilla',
-                help='Set this switch to post directly to bugzilla.mozilla.org \
-                    (without switch posts to: bugzilla-dev.allizom.org)',
-                action='store_true',
-                default=False,
-                required=False)
+        '-t', '--tag-num',
+        help='Enter: 0.17.2',
+        required=False
+    )
+    parser.add_argument(
+        '-e', '--environment',
+        help='Enter: STAGE, PRODUCTION',
+        default='STAGE',
+        required=False
+    )
+    parser.add_argument(
+        '-i', '--deployment-ticket-id',
+        help='Enter: 1234567',
+        required=True
+    )
+    parser.add_argument(
+        '-u', '--bugzilla-username',
+        required=True
+    )
+    parser.add_argument(
+        '-p', '--bugzilla-password',
+        required=True
+    )
+    parser.add_argument(
+        '-B', '--bugzilla-mozilla',
+        help='Set this switch to post directly to bugzilla.mozilla.org \
+        (without switch posts to: bugzilla-dev.allizom.org)',
+        action='store_true',
+        default=False,
+        required=False
+    )
 
     args = vars(parser.parse_args())
 
@@ -188,24 +209,24 @@ def stack_check(args=None):
     bugzilla_password = args['bugzilla_password']
 
     if args['bugzilla_mozilla']:
-        #TODO:
-        exit('REMOVE BEFORE MERGING!!!')
         url_bugzilla = URL_BUGZILLA_PROD
+        # REMOVE WHEN MERGING TO MASTER
+        exit()
     else:
         url_bugzilla = URL_BUGZILLA_DEV
 
     ticket = BugzillaRESTClient(
         url_bugzilla, bugzilla_username, bugzilla_password)
 
-    bastion_username = os.environ["BASTION_USERNAME"] 
-    bastion_host = os.environ["BASTION_HOST"] 
-    bastion_port = os.environ["BASTION_PORT"] 
-    bastion_host_uri = '{}@{}:{}'.format( 
+    bastion_username = os.environ["BASTION_USERNAME"]
+    bastion_host = os.environ["BASTION_HOST"]
+    bastion_port = os.environ["BASTION_PORT"]
+    bastion_host_uri = '{}@{}:{}'.format(
         bastion_username, bastion_host, bastion_port)
 
     ec2 = EC2Handler()
     filters = {
-        'tag:Type': application.replace('-', '_') 
+        'tag:Type': application.replace('-', '_')
     }
     instances = ec2.instances_newest(region, filters)
 
@@ -213,35 +234,41 @@ def stack_check(args=None):
         host_string = instance.public_dns_name
         instance_properties = ec2.instance_properties(region, instance)
 
-        check = StackChecker(bastion_host_uri, application, 
-            tag_num, environment, host_string, instance_properties)
+        check = StackChecker(
+            bastion_host_uri, application,
+            tag_num, environment, host_string, instance_properties
+        )
         result = check.main()
-
-        comment = host_string
         ticket.bug_update(bug_id, result)
+
 
 def loadtest(args=None):
     parser = argparse.ArgumentParser(
         description='Run loadtest to verify scalability (STAGE only)',
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
 
     parser.add_argument(
         '-t', '--test',
         help='Example: this is placeholder text',
         default='hello loadtest',
-        required=False)
+        required=False
+    )
 
-    args = vars(parser.parse_args())
+    # args = vars(parser.parse_args())
+
 
 def e2e_test(args=None):
     parser = argparse.ArgumentParser(
         description='Run e2e test for final STAGE verification',
-        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
 
     parser.add_argument(
         '-t', '--test',
         help='Example: this is placeholder text',
         default='hello e2e',
-        required=False)
+        required=False
+    )
 
-    args = vars(parser.parse_args())
+    # args = vars(parser.parse_args())

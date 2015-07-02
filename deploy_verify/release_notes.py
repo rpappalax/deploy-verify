@@ -3,9 +3,8 @@
 Notes:
 [1]  Github tags API only deals with tag objects - so only annotated tags, not
      lightweight tags.
-[2]  set GITHUB_ACCESS_TOKEN as env variable or you'll be restricted to 
+[2]  set GITHUB_ACCESS_TOKEN as env variable or you'll be restricted to
      60 reqs/hour (vs. 5000)
-
 """
 
 import os
