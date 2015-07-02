@@ -2,7 +2,7 @@
 deploy-verify
 ################################
 
-.. image:: https://travis-ci.org/rpappalax/deploy-verify.svg?branch=master
+.. image:: https://travis-ci.org/rpappalax/deploy-verify.svg?branch=dev
     :target: https://travis-ci.org/rpappalax/deploy-verify
 
 
