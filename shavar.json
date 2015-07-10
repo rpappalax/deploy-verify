@@ -1,0 +1,23 @@
+{
+  "envs" : {
+    "stage": {
+      "test_types": [ "stack-check", "loadtest" ],
+      "urls": {
+	"root" : "tracking.stage.mozaws.net",
+	"push_config" : "loop.stage.mozaws.net/push-server-config"
+      }
+    },
+    "prod": {
+      "test_types": [ "stack-check" ],
+      "urls": {
+        "root": "tracking.services.mozilla.com",
+	"push_config" : "loop.services.mozilla.com/push-server-config"
+      }
+    }
+  },
+  "protocols" : [ "http" ],
+  "processes" : [ "loop", "node", "datadog", "circus", "heka", "nginx" ],
+  "commands" : {
+      "curl -I": [ "<root>" ]
+    }
+}

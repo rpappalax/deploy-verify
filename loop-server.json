@@ -4,14 +4,16 @@
       "test_types": [ "stack-check", "loadtest" ],
       "urls": {
 	"root" : "loop.stage.mozaws.net",
-	"push_config" : "loop.stage.mozaws.net/push-server-config"
+	"push_config" : "loop.stage.mozaws.net/push-server-config",
+	"heartbeat" : "loop.stage.mozaws.net/__heartbeat__"
       }
     },
     "prod": {
       "test_types": [ "stack-check" ],
       "urls": {
         "root": "loop.services.mozilla.com",
-	"push_config" : "loop.services.mozilla.com/push-server-config"
+	"push_config" : "loop.services.mozilla.com/push-server-config",
+	"heartbeat" : "loop.services.mozilla.com/__heartbeat__"
       }
     }
   },

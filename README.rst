@@ -46,6 +46,11 @@ You must set the following environment variables
 - BASTION_USERNAME
 - GITHUB_ACCESS_TOKEN
 
+You will need either an account to:
+- bugzilla.mozilla.org
+- bugzilla-dev.allizom.org
+For creating and updating deployment tickets in bugzilla.
+
 
 Usage
 --------------------------
@@ -189,7 +194,58 @@ Build
 *******************************
 Stack Check
 *******************************
-<TBD>
+
+
+Stack-Check
+===============================
+
+
+Pre-requisites
+--------------------------
+You will need either an account to:
+- bugzilla.mozilla.org
+- bugzilla-dev.allizom.org
+for updating stack-check results to deployment ticket in bugzilla.
+
+You will need an AWS instance profile to run boto scripts
+
+
+
+Usage
+--------------------------
+Bugzilla deployment ticket handler. Use to create / update 
+bugzilla deployment tickets .
+
+.. parsed-literal::
+
+
+ $ stack-check -h
+ usage: stack-check [-h] -a APPLICATION -r REGION [-t TAG_NUM] [-e ENVIRONMENT]
+                    [-i DEPLOYMENT_TICKET_ID] -u BUGZILLA_USERNAME -p
+                    BUGZILLA_PASSWORD [-B]
+ 
+ Sanity check for basic stack deployment verification
+ 
+ optional arguments:
+   -h, --help            show this help message and exit
+   -a APPLICATION, --application APPLICATION
+                         Enter: loop-server, loop-client, etc. (default: loop-
+                         server)
+   -r REGION, --region REGION
+                         Enter: eu-west-1, us-east-1 (default: eu-west-1)
+   -t TAG_NUM, --tag-num TAG_NUM
+                         Enter: 0.17.2 (default: None)
+   -e ENVIRONMENT, --environment ENVIRONMENT
+                         Enter: STAGE, PRODUCTION (default: STAGE)
+   -i DEPLOYMENT_TICKET_ID, --deployment-ticket-id DEPLOYMENT_TICKET_ID
+                         Enter: 1234567 (default: None)
+   -u BUGZILLA_USERNAME, --bugzilla-username BUGZILLA_USERNAME
+   -p BUGZILLA_PASSWORD, --bugzilla-password BUGZILLA_PASSWORD
+   -B, --bugzilla-mozilla
+                         Set this switch to post directly to
+                         bugzilla.mozilla.org (without switch posts to:
+                         bugzilla-dev.allizom.org) (default: False)
+
 
 
 *******************************

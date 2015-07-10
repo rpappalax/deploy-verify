@@ -219,11 +219,11 @@ class BugzillaRESTClient(object):
         Returns:
             json string to GET from REST API
         """
-
         self.output.log('Searching bugs with summary: {0} \n \
             via bugzilla REST API...'.format(summary), True)
         url = '{0}/rest/bug'.format(self.host)
 
+        print '----------'
         data = self._get_json_search(summary)
         self.output.log(data)
 

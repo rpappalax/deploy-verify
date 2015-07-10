@@ -28,7 +28,7 @@ def ticket(args=None):
         required=True)
 
     parser.add_argument(
-        '-r', '--repo',
+        '-a', '--application',
         help='Example: loop-server',
         required=True)
 
@@ -84,7 +84,7 @@ def ticket(args=None):
 
     bugzilla_username = args['bugzilla_username']
     bugzilla_password = args['bugzilla_password']
-    repo = args['repo']
+    application = args['application']
 
     if args['bugzilla_mozilla']:
         url_bugzilla = URL_BUGZILLA_PROD
@@ -100,9 +100,9 @@ def ticket(args=None):
         bug_id = args['bug_id']
         comment = args['comment']
 
-        ticket.bug_update(repo, comment, bug_id)
+        ticket.bug_update(application, comment, bug_id)
 
-    if all(key in args for key in ['repo_owner', 'repo', 'environment']):
+    if all(key in args for key in ['repo_owner', 'application', 'environment']):
         repo_owner = args['repo_owner']
         environment = args['environment']
         if args['cc_mail']:
@@ -113,14 +113,14 @@ def ticket(args=None):
 
         output = OutputHelper()
         output.log('Create deployment ticket', True, True)
-        notes = ReleaseNotes(repo_owner, repo, environment)
+        notes = ReleaseNotes(repo_owner, application, environment)
         description = notes.get_release_notes()
         release_num = notes.last_tag
         output.log('Release Notes', True)
         output.log(description)
 
         ticket.bug_create(
-            release_num, repo, environment, status, description, cc_mail
+            release_num, application, environment, status, description, cc_mail
         )
 
 
@@ -239,7 +239,7 @@ def stack_check(args=None):
             tag_num, environment, host_string, instance_properties
         )
         result = check.main()
-        ticket.bug_update(result, bug_id)
+        ticket.bug_update(application, result, bug_id)
 
 
 def loadtest(args=None):
