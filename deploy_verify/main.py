@@ -217,7 +217,8 @@ def stack_check(args=None):
         url_bugzilla = URL_BUGZILLA_DEV
 
     ticket = BugzillaRESTClient(
-        url_bugzilla, bugzilla_username, bugzilla_password)
+        url_bugzilla, bugzilla_username, bugzilla_password
+    )
 
     bastion_username = os.environ["BASTION_USERNAME"]
     bastion_host = os.environ["BASTION_HOST"]
@@ -227,54 +228,29 @@ def stack_check(args=None):
 
     test_manifest = TestManifest(application)
     manifest = test_manifest.manifest(application)
+    environments = test_manifest.environments(manifest, environment)
+   
     ec2 = EC2Handler()
     filters = {
         'tag:Type': application.replace('-', '_')
     }
-    # xxx
-    test_manifest.stack_label(manifest, environment)
-    server_count = 2 
+    server_count = len(environments) 
     instances = ec2.instances_newest(region, filters)[:server_count]
 
-    #es = []
-    es = {} 
-    env_selected = environment.lower()
-    environments = manifest["envs"].keys()
-    for environment in environments:
-        if env_selected in environment:
-            #es.append(manifest["envs"][environment]["stack_label"])
-            es.update(
-                {environment: manifest["envs"][environment]["stack_label"]}
-            )
-   
     for instance in instances:
 
         host_string = instance.public_dns_name
         instance_properties = ec2.instance_properties(region, instance)
 
-        for environment, e in es.iteritems():
-            print environment, e
-            if e in instance.tags["Stack"]:
+        for environment, stack_label in environments.iteritems():
+            if stack_label in instance.tags["Stack"]:
 
-                #for environment in environments: 
                 check = StackChecker(
                     bastion_host_uri, application,
                     tag_num, environment, host_string, instance_properties
                 )
                 result = check.main()
                 ticket.bug_update(application, result, bug_id)
-
-        """
-        #for environment in environments: 
-        check = StackChecker(
-            bastion_host_uri, application,
-            tag_num, environment, host_string, instance_properties
-        )
-        result = check.main()
-        ticket.bug_update(application, result, bug_id)
-        """
-    exit()
-
 
 def loadtest(args=None):
     parser = argparse.ArgumentParser(

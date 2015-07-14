@@ -35,15 +35,38 @@ class TestManifest(object):
             label = None
         return label 
 
+    def environments(self, manifest, env_selected):
+        """Returns environments and their corresponding stack label 
+        as json string
+        
+        Example:
+            For msisdn-gateway, if env_match=="STAGE", we return:
+            {
+              u'stage': u'msisdnstage',
+              u'stage-loadtest': u'msisdnload',
+            }
+        """
+
+        envs_matching = {}  
+        env_selected = env_selected.lower()
+        environments = manifest["envs"].keys()
+        for environment in environments:
+            if env_selected in environment:
+                envs_matching.update(
+                    {environment: manifest["envs"][environment]["stack_label"]}
+                )    
+        return envs_matching
+
     def substitute_param(self, manifest, env, val):
+        """If we have a param in brackets, we substitute it for an url
+        with a key indicated:  <key_name_here>
+
+        Example:
+            <root> becomes:  https://xxx.services.mozilla.com
+        """
 
         import re
-        # TODO: we need to pass env var
         env = env.lower()
-        # if we have a param in brackets, we substitute it for an url
-        # with a key indicated:  <key_name_here>
-        # example:
-        # <root> becomes:  https://xxx.services.mozilla.com
         param = re.search(r'<(.*)>', val)
         if param:
             key_substitute = param.group(1)

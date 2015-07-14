@@ -2,6 +2,8 @@
   "envs" : {
     "stage": {
       "test_types": [ "stack-check", "loadtest" ],
+      "stack_label": "loopsvrstg",
+      "aws_region": "eu-west-1",
       "urls": {
 	"root" : "loop.stage.mozaws.net",
 	"push_config" : "loop.stage.mozaws.net/push-server-config",
@@ -10,6 +12,7 @@
     },
     "pre-prod": {
       "test_types": [ "stack-check" ],
+      "aws_region": "eu-west-1",
       "urls": {
         "root": "loop.services.mozilla.com",
 	"push_config" : "loop.services.mozilla.com/push-server-config",
@@ -18,6 +21,7 @@
     },
     "prod": {
       "test_types": [ "stack-check" ],
+      "aws_region": "eu-west-1",
       "urls": {
         "root": "loop.services.mozilla.com",
 	"push_config" : "loop.services.mozilla.com/push-server-config",
