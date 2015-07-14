@@ -32,11 +32,6 @@ class StackChecker(object):
         self.tag_num = tag_num
         self.env_selected = env_selected
 
-    def _test_manifest(self, application):
-
-        with open('{0}.json'.format(application)) as data_file:
-            return json.load(data_file)
-
     def _header_label(self, env=''):
 
         if env:
@@ -216,40 +211,11 @@ class StackChecker(object):
 
         return run('df') + '\n\n'
 
-    def main(self):
+    def main(self, manifest):
 
         out = ''
         env_selected = self.env_selected.lower()
 
-        manifest = self._test_manifest(self.application)
-        environments = manifest["envs"]
-
-        # we need to repeat these if we have multipe stage servers
-
-        """
-        for environment in environments:
-            if env_selected in environment:
-
-                out += self._header_label(environment)
-
-                out += '{0}\n\n'.format(self.instance_properties)
-
-                # out += 'PACKAGE VERSION\n\n'
-                # out += str(self.package_version())
-
-                if 'processes' in manifest:
-                    out += 'PROCESS CHECK\n\n'
-                    out += str(self.verify_processes(manifest))
-
-                out += 'URL CHECKS\n\n'
-                urls = self._urls(manifest, environment)
-                out += self.verify_urls(urls)
-
-                out += str(self.verify_commands(manifest, environment))
-
-                out += 'DISK SPACE\n\n'
-                out += self.diskspace()
-        """
         environment = self.env_selected
         out += self._header_label(environment)
 

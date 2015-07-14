@@ -158,12 +158,12 @@ def stack_check(args=None):
         default='loop-server',
         required=True
     )
-    parser.add_argument(
-        '-r', '--region',
-        help='Enter: eu-west-1, us-east-1',
-        default='eu-west-1',
-        required=True
-    )
+    #parser.add_argument(
+    #    '-r', '--region',
+    #    help='Enter: eu-west-1, us-east-1',
+    #    default='eu-west-1',
+    #    required=True
+    #)
     # Add as optional filter, without which we simply choose latest
     # We may also want to filter out a previous version
     parser.add_argument(
@@ -202,7 +202,7 @@ def stack_check(args=None):
     args = vars(parser.parse_args())
 
     application = args['application']
-    region = args['region']
+    #region = args['region']
     tag_num = args['tag_num']
     environment = args['environment']
     bug_id = args['deployment_ticket_id']
@@ -229,6 +229,7 @@ def stack_check(args=None):
     test_manifest = TestManifest(application)
     manifest = test_manifest.manifest(application)
     environments = test_manifest.environments(manifest, environment)
+    region = test_manifest.region(manifest, environment)
    
     ec2 = EC2Handler()
     filters = {
@@ -249,7 +250,7 @@ def stack_check(args=None):
                     bastion_host_uri, application,
                     tag_num, environment, host_string, instance_properties
                 )
-                result = check.main()
+                result = check.main(manifest)
                 ticket.bug_update(application, result, bug_id)
 
 def loadtest(args=None):

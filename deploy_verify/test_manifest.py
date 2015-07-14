@@ -34,6 +34,15 @@ class TestManifest(object):
                 urls.append('{0}://{1}'.format(protocol, val))
         return urls
 
+    def region(self, manifest, env):
+        env = env.lower()
+        try:
+            region = manifest["envs"][env]["aws_region"]
+        except KeyError, e:
+            print('no region found')
+            region = None
+        return region 
+
     def stack_label(self, manifest, env):
         env = env.lower()
         try:
