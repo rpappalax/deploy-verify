@@ -1,4 +1,11 @@
 import json
+import requests
+
+
+URL_GITHUB = 'https://raw.githubusercontent.com'
+# TODO: once test manifests are hardened, point to:
+# REPO = 'mozilla-services/services-test/master'
+REPO = 'rpappalax/services-test/master'
 
 
 class TestManifest(object):
@@ -7,11 +14,12 @@ class TestManifest(object):
 
         self.application = application
 
-    #def _test_manifest(self, application):
     def manifest(self, application):
-
-        with open('{0}.json'.format(application)) as data_file:
-            return json.load(data_file)
+        url = '{0}/{1}/{2}/manifest.json'.format(
+            URL_GITHUB, REPO, application
+        )
+        r = requests.get(url)
+        return r.json()
 
     def urls(self, manifest, env):
 
