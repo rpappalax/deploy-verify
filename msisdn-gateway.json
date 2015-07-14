@@ -1,16 +1,34 @@
 {
-    "urls" : {
+    "envs" : {
 	"stage": {
-	    "root" : "msisdn.stage.mozaws.net",
-	    "heartbeat" : "msisdn.stage.mozaws.net/__heartbeat__"
+	    "test_types" : [ "stack-check" ],
+            "stack_label" : "msisdnstage",
+            "urls": {
+	      "root" : "msisdn.stage.mozaws.net",
+	      "heartbeat" : "msisdn.stage.mozaws.net/__heartbeat__"
+            }
 	},
 	"stage-loadtest": {
-	    "root" : "msisdn-loadtest.stage.mozaws.net",
-	    "heartbeat" : "msisdn-loadtest.stage.mozaws.net/__heartbeat__"
+	    "test_types" : [ "stack-check" ],
+            "stack_label" : "msisdnload",
+            "urls": {
+	      "root" : "msisdn-loadtest.stage.mozaws.net",
+	      "heartbeat" : "msisdn-loadtest.stage.mozaws.net/__heartbeat__"
+            }
+	},
+	"pre-prod": {
+	    "test_types" : [ "stack-check" ],
+            "urls": {
+	      "root": "msisdn.services.mozilla.com",
+	      "heartbeat" : "msisdn.services.mozilla.com/__heartbeat__"
+            }
 	},
 	"prod": {
-	    "root": "msisdn.services.mozilla.com",
-	    "heartbeat" : "msisdn.services.mozilla.com/__heartbeat__"
+	    "test_types" : [ "stack-check" ],
+            "urls": {
+	      "root": "msisdn.services.mozilla.com",
+	      "heartbeat" : "msisdn.services.mozilla.com/__heartbeat__"
+            }
 	}
     },
     "protocols" : [ "https" ],

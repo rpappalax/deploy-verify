@@ -9,6 +9,15 @@
 	  "loop_server": "loop.stage.mozaws.net"
 	}
       },
+      "pre-prod": {
+	"test_types": [ "stack-check" ], 
+	"urls": {
+	  "root": "hello.firefox.com",
+	  "config.js" : "hello.firefox.com/config.js",
+	  "push_config" : "loop.services.mozilla.com/push-server-config",
+	  "loop_server": "loop.services.mozilla.com"
+	}
+      },
       "prod": {
 	"test_types": [ "stack-check" ], 
 	"urls": {

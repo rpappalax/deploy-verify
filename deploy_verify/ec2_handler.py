@@ -13,8 +13,8 @@ LINE = '----------------------------'
 
 class EC2Handler(object):
 
-    def __init__(self):
-        pass
+    #def __init__(self):
+    #    pass
 
     def instances_newest(self, region, filters):
         """Get chronologically sorted list of instances
@@ -37,7 +37,8 @@ class EC2Handler(object):
         reservations = ec2_conn.get_all_instances(filters=filters)
         instances = [i for r in reservations for i in r.instances]
 
-        return sorted(instances, key=attrgetter(sort_by))
+        # sort list, return last element
+        return sorted(instances, key=attrgetter(sort_by), reverse=True)
 
     def instance_properties(self, region, instance):
 

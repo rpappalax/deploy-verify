@@ -8,6 +8,14 @@
 	"heartbeat" : "loop.stage.mozaws.net/__heartbeat__"
       }
     },
+    "pre-prod": {
+      "test_types": [ "stack-check" ],
+      "urls": {
+        "root": "loop.services.mozilla.com",
+	"push_config" : "loop.services.mozilla.com/push-server-config",
+	"heartbeat" : "loop.services.mozilla.com/__heartbeat__"
+      }
+    },
     "prod": {
       "test_types": [ "stack-check" ],
       "urls": {

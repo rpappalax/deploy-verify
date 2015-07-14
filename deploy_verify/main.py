@@ -4,6 +4,7 @@ from deploy_verify.bugzilla_rest_client import BugzillaRESTClient
 from deploy_verify.release_notes import ReleaseNotes
 from deploy_verify.ec2_handler import EC2Handler
 from deploy_verify.stack_checker import StackChecker
+from deploy_verify.test_manifest import TestManifest 
 from output_helper import OutputHelper
 
 
@@ -224,22 +225,55 @@ def stack_check(args=None):
     bastion_host_uri = '{}@{}:{}'.format(
         bastion_username, bastion_host, bastion_port)
 
+    test_manifest = TestManifest(application)
+    manifest = test_manifest.manifest(application)
     ec2 = EC2Handler()
     filters = {
         'tag:Type': application.replace('-', '_')
     }
-    instances = ec2.instances_newest(region, filters)
+    # xxx
+    test_manifest.stack_label(manifest, environment)
+    server_count = 2 
+    instances = ec2.instances_newest(region, filters)[:server_count]
 
+    #es = []
+    es = {} 
+    env_selected = environment.lower()
+    environments = manifest["envs"].keys()
+    for environment in environments:
+        if env_selected in environment:
+            #es.append(manifest["envs"][environment]["stack_label"])
+            es.update(
+                {environment: manifest["envs"][environment]["stack_label"]}
+            )
+   
     for instance in instances:
+
         host_string = instance.public_dns_name
         instance_properties = ec2.instance_properties(region, instance)
 
+        for environment, e in es.iteritems():
+            print environment, e
+            if e in instance.tags["Stack"]:
+
+                #for environment in environments: 
+                check = StackChecker(
+                    bastion_host_uri, application,
+                    tag_num, environment, host_string, instance_properties
+                )
+                result = check.main()
+                ticket.bug_update(application, result, bug_id)
+
+        """
+        #for environment in environments: 
         check = StackChecker(
             bastion_host_uri, application,
             tag_num, environment, host_string, instance_properties
         )
         result = check.main()
         ticket.bug_update(application, result, bug_id)
+        """
+    exit()
 
 
 def loadtest(args=None):

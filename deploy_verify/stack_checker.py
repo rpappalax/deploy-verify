@@ -17,6 +17,7 @@ class StackChecker(object):
         env_selected, host_string, instance_properties
     ):
 
+
         self.instance_properties = instance_properties
 
         # Fabric settings
@@ -123,14 +124,6 @@ class StackChecker(object):
 
         return 'c3db82a'
 
-    def get_rpm_qa(self):
-
-        out = ''
-        cmd = 'rpm -qa | grep {}'.format(self.application)
-        out += '$ {}:\n'.format(cmd)
-        out += run(cmd) + '\n\n'
-        return out
-
     def substitute_param(self, manifest, env, val):
 
         import re
@@ -233,12 +226,11 @@ class StackChecker(object):
 
         # we need to repeat these if we have multipe stage servers
 
+        """
         for environment in environments:
             if env_selected in environment:
 
                 out += self._header_label(environment)
-                # out += 'RPM INFO\n'
-                # out += str(self.get_rpm_qa())
 
                 out += '{0}\n\n'.format(self.instance_properties)
 
@@ -257,6 +249,27 @@ class StackChecker(object):
 
                 out += 'DISK SPACE\n\n'
                 out += self.diskspace()
+        """
+        environment = self.env_selected
+        out += self._header_label(environment)
+
+        out += '{0}\n\n'.format(self.instance_properties)
+
+        # out += 'PACKAGE VERSION\n\n'
+        # out += str(self.package_version())
+
+        if 'processes' in manifest:
+            out += 'PROCESS CHECK\n\n'
+            out += str(self.verify_processes(manifest))
+
+        out += 'URL CHECKS\n\n'
+        urls = self._urls(manifest, environment)
+        out += self.verify_urls(urls)
+
+        out += str(self.verify_commands(manifest, environment))
+
+        out += 'DISK SPACE\n\n'
+        out += self.diskspace()
         return out
 
 if __name__ == '__main__':
