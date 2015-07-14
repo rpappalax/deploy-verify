@@ -111,7 +111,7 @@ class StackChecker(object):
                 out += run(cmd) + '\n\n'
             except FabricException:
                 print('ERROR: unable to run command - {0}'.format(cmd))
-                exit()
+                exit(1)
         return out
 
     # @TODO: check this against git tag

@@ -144,7 +144,7 @@ class BugzillaRESTClient(object):
             new_bug_id = req.json()['id']
         except KeyError:
             print('\nERROR: {0}!\n'.format(req.text))
-            exit()
+            exit(1)
 
         self.output.log('\nNew bug ID: {0}\nDONE!\n\n'.format(new_bug_id))
         return new_bug_id

@@ -90,7 +90,7 @@ def ticket(args=None):
     if args['bugzilla_mozilla']:
         url_bugzilla = URL_BUGZILLA_PROD
         # REMOVE WHEN MERGING TO MASTER
-        exit()
+        exit(1)
     else:
         url_bugzilla = URL_BUGZILLA_DEV
 
@@ -212,7 +212,7 @@ def stack_check(args=None):
     if args['bugzilla_mozilla']:
         url_bugzilla = URL_BUGZILLA_PROD
         # REMOVE WHEN MERGING TO MASTER
-        exit()
+        exit(1)
     else:
         url_bugzilla = URL_BUGZILLA_DEV
 
@@ -237,6 +237,10 @@ def stack_check(args=None):
     }
     server_count = len(environments) 
     instances = ec2.instances_newest(region, filters)[:server_count]
+
+    if len(instances)==0:
+        print('\nERROR: No instances found! ABORTING!\n')
+        exit(1)
 
     for instance in instances:
 
