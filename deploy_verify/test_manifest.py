@@ -88,7 +88,7 @@ class TestManifest(object):
         if param:
             key_substitute = param.group(1)
             val = manifest["envs"][env]["urls"][key_substitute]
-            val = 'https://{}'.format(val)
+            val = 'https://{0}'.format(val)
         return val
 
 

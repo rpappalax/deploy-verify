@@ -223,7 +223,7 @@ def stack_check(args=None):
     bastion_username = os.environ["BASTION_USERNAME"]
     bastion_host = os.environ["BASTION_HOST"]
     bastion_port = os.environ["BASTION_PORT"]
-    bastion_host_uri = '{}@{}:{}'.format(
+    bastion_host_uri = '{0}@{1}:{2}'.format(
         bastion_username, bastion_host, bastion_port)
 
     test_manifest = TestManifest(application)

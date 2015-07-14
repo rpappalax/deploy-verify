@@ -84,10 +84,10 @@ class StackChecker(object):
         """
         out = ''
         if self.application == 'loop-server':
-            cmd = 'cat /data/{}/VERSION.txt'.format(self.application)
+            cmd = 'cat /data/{0}/VERSION.txt'.format(self.application)
         else:
-            cmd = 'cat /data/{}/content/VERSION.txt'.format(self.application)
-        out += '$ {}:\n'.format(cmd)
+            cmd = 'cat /data/{0}/content/VERSION.txt'.format(self.application)
+        out += '$ {0}:\n'.format(cmd)
         out += run(cmd) + '\n\n'
         return out
 
@@ -102,10 +102,10 @@ class StackChecker(object):
         out = ''
         cmd = ''
         if self.application == 'loop-server':
-            cmd = 'sed -n "/version/p" /data/{}/package.json'.format(
+            cmd = 'sed -n "/version/p" /data/{0}/package.json'.format(
                 self.application
             )
-            out += '$ {}:\n'.format(cmd)
+            out += '$ {0}:\n'.format(cmd)
 
             try:
                 out += run(cmd) + '\n\n'
@@ -132,7 +132,7 @@ class StackChecker(object):
         if param:
             key_substitute = param.group(1)
             val = manifest["envs"][env]["urls"][key_substitute]
-            val = 'https://{}'.format(val)
+            val = 'https://{0}'.format(val)
         return val
 
     def verify_commands(self, manifest, env):
@@ -141,8 +141,8 @@ class StackChecker(object):
         for key, vals in manifest["commands"].iteritems():
             for val in vals:
                 val = self.substitute_param(manifest, env, val)
-                cmd = '{} {}'.format(key, val)
-                out += '$ {}:\n'.format(cmd)
+                cmd = '{0} {1}'.format(key, val)
+                out += '$ {0}:\n'.format(cmd)
                 out += run(cmd)
                 # remove blank lines
                 out = "".join(
@@ -183,17 +183,17 @@ class StackChecker(object):
         not_running = ', '.join(not_running)
 
         if len(running) > 0:
-            out_cmds += '{} --> Running!\n'.format(running)
+            out_cmds += '{0} --> Running!\n'.format(running)
         if len(not_running) > 0:
             # TODO: if not running, we'll need to return a FAIL flag
-            out_cmds += '{} --> NOT RUNNING!!!\n'.format(not_running)
+            out_cmds += '{0} --> NOT RUNNING!!!\n'.format(not_running)
         return out_cmds + '\n\n'
 
     def get_linux_version(self):
 
         out = ''
         cmd = 'cat /etc/*release'
-        out += '$ {}:\n'.format(cmd)
+        out += '$ {0}:\n'.format(cmd)
         out += run(cmd) + '\n\n'
         return out
 
@@ -245,8 +245,9 @@ if __name__ == '__main__':
     bastion_username = os.environ["BASTION_USERNAME"]
     bastion_host = os.environ["BASTION_HOST"]
     bastion_port = os.environ["BASTION_PORT"]
-    bastion_host_uri = '{}@{}:{}'.format(
-        bastion_username, bastion_host, bastion_port)
+    bastion_host_uri = '{0}@{1}:{2}'.format(
+        bastion_username, bastion_host, bastion_port
+    )
 
     # example
     application = 'loop-server'
