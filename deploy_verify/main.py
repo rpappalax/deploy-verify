@@ -252,7 +252,8 @@ def stack_check(args=None):
 
                 check = StackChecker(
                     bastion_host_uri, application,
-                    tag_num, environment, host_string, instance_properties
+                    tag_num, environment, host_string, instance_properties,
+                    test_manifest
                 )
                 result = check.main(manifest)
                 ticket.bug_update(application, result, bug_id)

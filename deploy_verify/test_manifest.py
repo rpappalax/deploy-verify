@@ -6,33 +6,52 @@ URL_GITHUB = 'https://raw.githubusercontent.com'
 # TODO: once test manifests are hardened, point to:
 # REPO = 'mozilla-services/services-test/master'
 REPO = 'rpappalax/services-test/master'
+KEY = 0
+VAL = 1
 
 
 class TestManifest(object):
 
     def __init__(self, application):
-
         self.application = application
 
     def manifest(self, application):
         url = '{0}/{1}/{2}/manifest.json'.format(
             URL_GITHUB, REPO, application
-        )
+        ) 
         r = requests.get(url)
         return r.json()
+        # FOR LOCAL DEV ONLY 
+        #file_path = '/Users/rpappalardo/git/services-test/{}/manifest.json'.format(application)
+        #with open(file_path) as data_file:
+        #    return json.load(data_file)
 
     def urls(self, manifest, env):
-
         env = env.lower()
         protocols = ['https']
         # TODO: http - need failure check
         # http redirects for loop-client, but not for loop-server
         # protocols = ['http', 'https']
         urls = []
+        url_root = manifest["envs"][env]["urls"]["root"]
         for key, val in manifest["envs"][env]["urls"].iteritems():
             for protocol in protocols:
-                urls.append('{0}://{1}'.format(protocol, val))
-        return urls
+                if 'root' in key:
+                    # we want root url to sort first
+                    key = key.replace('root', '_root')
+                urls.append([key, val])
+                
+        urls.sort(key=lambda x: x[0]) 
+        urls_new = []
+        for url in urls:
+            if not '/' in url[KEY]:
+                root = url[VAL]
+            if '/' in url[KEY]:
+                urls_new.append('{0}://{1}/{2}'.format(
+                    protocol, root, url[VAL]))
+            else:
+                urls_new.append('{0}://{1}'.format(protocol, url[VAL]))
+        return urls_new
 
     def region(self, manifest, env):
         env = env.lower()
@@ -48,7 +67,7 @@ class TestManifest(object):
         try:
             label = manifest["envs"][env]["stack_label"]
         except KeyError, e:
-            print('no stack label found')
+            print('no stack_label found')
             label = None
         return label 
 

@@ -14,11 +14,13 @@ class StackChecker(object):
 
     def __init__(
         self, jump_host_uri, application, tag_num,
-        env_selected, host_string, instance_properties
+        env_selected, host_string, instance_properties,
+        test_manifest
     ):
 
 
         self.instance_properties = instance_properties
+        self.test_manifest = test_manifest
 
         # Fabric settings
         env.gateway = jump_host_uri
@@ -39,6 +41,7 @@ class StackChecker(object):
         label = 'STACK CHECK {0}'.format(env)
         return '{0}\n{1}\n{2}\n\n'.format(LINE, label, LINE)
 
+    """
     def _urls(self, manifest, env):
 
         # env = 'stage'
@@ -52,6 +55,7 @@ class StackChecker(object):
             for protocol in protocols:
                 urls.append('{0}://{1}'.format(protocol, val))
         return urls
+    """
 
     def _http_request(self, url):
         # requests: r.status_code, r.headers, r.content
@@ -229,7 +233,8 @@ class StackChecker(object):
             out += str(self.verify_processes(manifest))
 
         out += 'URL CHECKS\n\n'
-        urls = self._urls(manifest, environment)
+        #urls = self._urls(manifest, environment)
+        urls = self.test_manifest.urls(manifest, env_selected)
         out += self.verify_urls(urls)
 
         out += str(self.verify_commands(manifest, environment))
