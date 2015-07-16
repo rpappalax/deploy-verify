@@ -41,10 +41,23 @@ class EC2Handler(object):
         return sorted(instances, key=attrgetter(sort_by), reverse=True)
 
     def instance_properties(self, region, instance):
+       
 
+        try:
+            if instance.tags["Stack"]:
+                stack = instance.tags["Stack"]
+        except KeyError:
+            pass
+        """
+            if hasattr(instance.tags["xxx"]):
+                print "xxx: EXISTS"
+                exit()
+        """
+        
         props = 'EC2 INSTANCE PROPERTIES\n  \
             \nregion: {0}: \nid: {1} \ntags["Type"]: {2}  \
-            \ntags["AppGitRef"]: {3}\ntags["Stack"]: {4}  \
+            \ntags["AppGitRef"]: {3}\n \
+            \ntags["Stack"]: {4}  \
             \npublic_dns_name: {5} \
             \nlaunch_time: {6}\n'.format(
             region,
@@ -80,6 +93,8 @@ def main():
 
     for region in regions:
         instances = ec2.instances_newest(region, filters)
+        print instances
+        exit()
         for instance in instances:
             print('--------------------')
             print(ec2.instance_properties(region, instance))

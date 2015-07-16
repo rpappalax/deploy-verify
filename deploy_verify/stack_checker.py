@@ -2,7 +2,7 @@ import json
 from fabric.api import run, env
 from deploy_verify.ec2_handler import EC2Handler
 
-
+REQUEST_TIMEOUT = 3.0
 LINE = '----------------------------'
 
 
@@ -41,41 +41,30 @@ class StackChecker(object):
         label = 'STACK CHECK {0}'.format(env)
         return '{0}\n{1}\n{2}\n\n'.format(LINE, label, LINE)
 
-    """
-    def _urls(self, manifest, env):
-
-        # env = 'stage'
-        env = env.lower()
-        protocols = ['https']
-        # TODO: http - need failure check
-        # http redirects for loop-client, but not for loop-server
-        # protocols = ['http', 'https']
-        urls = []
-        for key, val in manifest["envs"][env]["urls"].iteritems():
-            for protocol in protocols:
-                urls.append('{0}://{1}'.format(protocol, val))
-        return urls
-    """
-
     def _http_request(self, url):
         # requests: r.status_code, r.headers, r.content
 
         import requests
         out = ''
 
-        response = requests.get(url)
-        if response.history:
-            out += "Request was redirected!\n"
-            for resp in response.history:
-                print resp.status_code, resp.url
-            out += 'status code: {0} --> destination: {1}\n'.format(
-                response.status_code, response.url)
-        else:
-            try:
-                j = json.loads(response.content)
-                out += json.dumps(j, indent=4)
-            except ValueError:
-                out = response.content
+        try:
+            response = requests.get(url, timeout=REQUEST_TIMEOUT)
+            response_time = requests.get(url).elapsed.total_seconds() 
+            if response.history:
+                out += "Request was redirected!\n"
+                for resp in response.history:
+                    print resp.status_code, resp.url
+                out += 'status code: {0} --> destination: {1}\n'.format(
+                    response.status_code, response.url)
+            else:
+                try:
+                    j = json.loads(response.content)
+                    out += json.dumps(j, indent=4)
+                except ValueError:
+                    out = response.content
+            out += '\nResponse time: {0}\n'.format(response_time)
+        except requests.exceptions.Timeout:
+            out += ">>> ERROR! Request timed out! <<<\n"
         return out + '\n\n'
 
     def get_version_txt(self):
@@ -211,8 +200,8 @@ class StackChecker(object):
         return out + '\n\n'
 
     def diskspace(self):
-        # Use to check disk space before / after loadtest
 
+        # Use to check disk space before / after loadtest
         return run('df') + '\n\n'
 
     def main(self, manifest):
@@ -228,19 +217,20 @@ class StackChecker(object):
         # out += 'PACKAGE VERSION\n\n'
         # out += str(self.package_version())
 
-        if 'processes' in manifest:
-            out += 'PROCESS CHECK\n\n'
-            out += str(self.verify_processes(manifest))
+        if env_selected != 'PRODUCTION':
+            if 'processes' in manifest:
+                out += 'PROCESS CHECK\n\n'
+                out += str(self.verify_processes(manifest))
 
         out += 'URL CHECKS\n\n'
-        #urls = self._urls(manifest, environment)
         urls = self.test_manifest.urls(manifest, env_selected)
         out += self.verify_urls(urls)
 
         out += str(self.verify_commands(manifest, environment))
 
-        out += 'DISK SPACE\n\n'
-        out += self.diskspace()
+        # Use for loadtest pre/post check only
+        #out += 'DISK SPACE\n\n'
+        #out += self.diskspace()
         return out
 
 if __name__ == '__main__':

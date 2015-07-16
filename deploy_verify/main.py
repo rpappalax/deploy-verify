@@ -158,12 +158,12 @@ def stack_check(args=None):
         default='loop-server',
         required=True
     )
-    #parser.add_argument(
-    #    '-r', '--region',
-    #    help='Enter: eu-west-1, us-east-1',
-    #    default='eu-west-1',
-    #    required=True
-    #)
+    parser.add_argument(
+        '-r', '--region',
+        help='Enter: eu-west-1, us-east-1',
+        default='eu-west-1',
+        required=False
+    )
     # Add as optional filter, without which we simply choose latest
     # We may also want to filter out a previous version
     parser.add_argument(
