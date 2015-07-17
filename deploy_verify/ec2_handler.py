@@ -42,20 +42,30 @@ class EC2Handler(object):
 
     def instance_properties(self, region, instance):
        
-
+        props = 'EC2 INSTANCE PROPERTIES\n'
+        props += 'region: {0}: \nid: {1}\n'.format(region, instance.id)
         try:
-            if instance.tags["Stack"]:
-                stack = instance.tags["Stack"]
+            if instance.tags["Type"]:
+                props += 'tags["Type"]: {0}\n'.format(instance.tags["Type"])
         except KeyError:
             pass
+        try:
+            if instance.tags["AppGitRef"]:
+                props += 'tags["AppGitRef"]: {0}\n'.format(instance.tags["AppGitRef"])
+        except KeyError:
+            pass
+        try:
+            if instance.tags["Stack"]:
+                props += 'tags["Stack"]: {0}\n'.format(instance.tags["Stack"])
+        except KeyError:
+            pass
+        props += 'public_dns_name: {0}\n'.format(instance.public_dns_name)
+        props += 'launch_time: {0}\n'.format(instance.launch_time)
+      
         """
-            if hasattr(instance.tags["xxx"]):
-                print "xxx: EXISTS"
-                exit()
-        """
-        
         props = 'EC2 INSTANCE PROPERTIES\n  \
-            \nregion: {0}: \nid: {1} \ntags["Type"]: {2}  \
+            \nregion: {0}: \nid: {1} \n \
+            \ntags["Type"]: {2}  \
             \ntags["AppGitRef"]: {3}\n \
             \ntags["Stack"]: {4}  \
             \npublic_dns_name: {5} \
@@ -68,6 +78,7 @@ class EC2Handler(object):
             instance.public_dns_name,
             instance.launch_time
         )
+        """
         return props
 
 

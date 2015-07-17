@@ -202,7 +202,7 @@ def stack_check(args=None):
     args = vars(parser.parse_args())
 
     application = args['application']
-    #region = args['region']
+    region = args['region']
     tag_num = args['tag_num']
     environment = args['environment']
     bug_id = args['deployment_ticket_id']
@@ -232,6 +232,8 @@ def stack_check(args=None):
     region = test_manifest.region(manifest, environment)
    
     ec2 = EC2Handler()
+
+    # TODO: add region conditionally as a filter element 
     filters = {
         'tag:Type': application.replace('-', '_')
     }

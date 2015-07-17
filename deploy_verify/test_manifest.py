@@ -37,7 +37,7 @@ class TestManifest(object):
         for key, val in manifest["envs"][env]["urls"].iteritems():
             for protocol in protocols:
                 if 'root' in key:
-                    # we want root url to sort first
+                    # force root url to sort first
                     key = key.replace('root', '_root')
                 urls.append([key, val])
                 

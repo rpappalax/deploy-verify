@@ -217,16 +217,16 @@ class StackChecker(object):
         # out += 'PACKAGE VERSION\n\n'
         # out += str(self.package_version())
 
-        if env_selected != 'PRODUCTION':
-            if 'processes' in manifest:
-                out += 'PROCESS CHECK\n\n'
-                out += str(self.verify_processes(manifest))
+        if 'processes' in manifest and env_selected != 'PRODUCTION':
+            out += 'PROCESS CHECK\n\n'
+            out += str(self.verify_processes(manifest))
 
         out += 'URL CHECKS\n\n'
         urls = self.test_manifest.urls(manifest, env_selected)
         out += self.verify_urls(urls)
 
-        out += str(self.verify_commands(manifest, environment))
+        if 'commands' in manifest:
+            out += str(self.verify_commands(manifest, environment))
 
         # Use for loadtest pre/post check only
         #out += 'DISK SPACE\n\n'
