@@ -5,18 +5,31 @@
    http://bugzilla.readthedocs.org/en/latest/api/index.html
 """
 
+import os
 import sys
 import json
 import requests
 from output_helper import OutputHelper
 
-URL_BUGZILLA_PROD = 'https://bugzilla.mozilla.org'
-URL_BUGZILLA_DEV = 'https://bugzilla-dev.allizom.org'
+#URL_BUGZILLA_PROD = 'https://bugzilla.mozilla.org'
+#URL_BUGZILLA_DEV = 'https://bugzilla-dev.allizom.org'
 PRODUCT_PROD = 'Cloud Services'
 PRODUCT_DEV = 'Mozilla Services'
 COMPONENT_PROD = 'Operations: Deployment Requests'
 COMPONENT_DEV = 'General'
 HEADERS = {'Content-type': 'application/json', 'Accept': 'text/plain'}
+
+URL_BUGZILLA_PROD = 'https://bugzilla.mozilla.org'
+if os.environ['BUGZILLA_USERNAME']:
+    BUGZILLA_USERNAME = os.environ['BUGZILLA_USERNAME']
+if os.environ['BUGZILLA_PASSWORD']:
+    BUGZILLA_PASSWORD= os.environ['BUGZILLA_PASSWORD']
+
+URL_BUGZILLA_DEV = 'https://bugzilla-dev.allizom.org'
+if os.environ['BUGZILLA_DEV_USERNAME']:
+    BUGZILLA_DEV_USERNAME = os.environ['BUGZILLA_DEV_USERNAME']
+if os.environ['BUGZILLA_DEV_PASSWORD']:
+    BUGZILLA_DEV_PASSWORD= os.environ['BUGZILLA_DEV_PASSWORD']
 
 
 class InvalidCredentials(Exception):
@@ -26,19 +39,33 @@ class InvalidCredentials(Exception):
 class BugzillaRESTClient(object):
     """"Used for CRUD operations against Bugzilla REST API"""
 
-    def __init__(self, host, bugzilla_username, bugzilla_password):
+    #def __init__(self, host, bugzilla_username, bugzilla_password):
+    def __init__(self, host):
 
         self.output = OutputHelper()
         self.host = host
-        self.username = bugzilla_username
-        self.password = bugzilla_password
-        self.token = self.get_token(host)
+        #self.username = bugzilla_username
+        #self.password = bugzilla_password
+
 
         # bugzilla-dev doesn't mirror the same components,
         # so we'll populate these conditionally
-        self.bugzilla_product = PRODUCT_DEV if 'dev' in host else PRODUCT_PROD
-        self.bugzilla_component = COMPONENT_DEV if 'dev' in host else \
-            COMPONENT_PROD
+        if 'dev' in host:
+            self.username = BUGZILLA_DEV_USERNAME
+            self.password = BUGZILLA_DEV_PASSWORD
+            self.bugzilla_product = PRODUCT_DEV
+            self.bugzilla_component = COMPONENT_DEV
+        else:
+            self.username = BUGZILLA_USERNAME
+            self.password = BUGZILLA_PASSWORD
+            self.bugzilla_product = PRODUCT_PROD
+            self.bugzilla_component = COMPONENT_PROD
+
+        #self.bugzilla_product = PRODUCT_DEV if 'dev' in host else PRODUCT_PROD
+        #self.bugzilla_component = COMPONENT_DEV if 'dev' in host else \
+        #    COMPONENT_PROD
+
+        self.token = self.get_token(host)
 
     def _get_json_create(
         self, release_num, application,

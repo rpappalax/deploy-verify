@@ -3,13 +3,23 @@ import argparse
 from deploy_verify.bugzilla_rest_client import BugzillaRESTClient
 from deploy_verify.release_notes import ReleaseNotes
 from deploy_verify.ec2_handler import EC2Handler
-from deploy_verify.stack_checker import StackChecker
 from deploy_verify.test_manifest import TestManifest 
+from deploy_verify.stack_checker import StackChecker
+from deploy_verify.url_checker import UrlChecker
 from output_helper import OutputHelper
 
 
 URL_BUGZILLA_PROD = 'https://bugzilla.mozilla.org'
+if os.environ['BUGZILLA_USERNAME']:
+    BUGZILLA_USERNAME = os.environ['BUGZILLA_USERNAME']
+if os.environ['BUGZILLA_PASSWORD']:
+    BUGZILLA_PASSWORD= os.environ['BUGZILLA_PASSWORD']
+
 URL_BUGZILLA_DEV = 'https://bugzilla-dev.allizom.org'
+if os.environ['BUGZILLA_DEV_USERNAME']:
+    BUGZILLA_DEV_USERNAME = os.environ['BUGZILLA_DEV_USERNAME']
+if os.environ['BUGZILLA_DEV_PASSWORD']:
+    BUGZILLA_DEV_PASSWORD= os.environ['BUGZILLA_DEV_PASSWORD']
 
 
 def ticket(args=None):
@@ -18,15 +28,6 @@ def ticket(args=None):
         description='Scripts for creating / updating deployment tickets in \
         Bugzilla',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-
-    # parser for ticket - any option
-    parser.add_argument(
-        '-u', '--bugzilla-username',
-        required=True)
-
-    parser.add_argument(
-        '-p', '--bugzilla-password',
-        required=True)
 
     parser.add_argument(
         '-a', '--application',
@@ -83,19 +84,22 @@ def ticket(args=None):
 
     args = vars(parser.parse_args())
 
-    bugzilla_username = args['bugzilla_username']
-    bugzilla_password = args['bugzilla_password']
     application = args['application']
 
     if args['bugzilla_mozilla']:
         url_bugzilla = URL_BUGZILLA_PROD
+        bugzilla_username = BUGZILLA_USERNAME 
+        bugzilla_password = BUGZILLA_PASSWORD 
         # REMOVE WHEN MERGING TO MASTER
         exit(1)
     else:
         url_bugzilla = URL_BUGZILLA_DEV
+        bugzilla_username = BUGZILLA_DEV_USERNAME 
+        bugzilla_password = BUGZILLA_DEV_PASSWORD 
 
-    ticket = BugzillaRESTClient(
-        url_bugzilla, bugzilla_username, bugzilla_password)
+    #ticket = BugzillaRESTClient(
+    #    url_bugzilla, bugzilla_username, bugzilla_password)
+    ticket = BugzillaRESTClient(url_bugzilla)
 
     if all(key in args for key in ['bug_id', 'comment']):
         bug_id = args['bug_id']
@@ -182,14 +186,14 @@ def stack_check(args=None):
         help='Enter: 1234567',
         required=False
     )
-    parser.add_argument(
-        '-u', '--bugzilla-username',
-        required=True
-    )
-    parser.add_argument(
-        '-p', '--bugzilla-password',
-        required=True
-    )
+    #parser.add_argument(
+    #    '-u', '--bugzilla-username',
+    #    required=True
+    #)
+    #parser.add_argument(
+    #    '-p', '--bugzilla-password',
+    #    required=True
+    #)
     parser.add_argument(
         '-B', '--bugzilla-mozilla',
         help='Set this switch to post directly to bugzilla.mozilla.org \
@@ -206,19 +210,31 @@ def stack_check(args=None):
     tag_num = args['tag_num']
     environment = args['environment']
     bug_id = args['deployment_ticket_id']
-    bugzilla_username = args['bugzilla_username']
-    bugzilla_password = args['bugzilla_password']
+    #bugzilla_username = args['bugzilla_username']
+    #bugzilla_password = args['bugzilla_password']
+
+    #if args['bugzilla_mozilla']:
+    #    url_bugzilla = URL_BUGZILLA_PROD
+    #    # REMOVE WHEN MERGING TO MASTER
+    #    exit(1)
+    #else:
+    #    url_bugzilla = URL_BUGZILLA_DEV
 
     if args['bugzilla_mozilla']:
         url_bugzilla = URL_BUGZILLA_PROD
+        bugzilla_username = BUGZILLA_USERNAME 
+        bugzilla_password = BUGZILLA_PASSWORD 
         # REMOVE WHEN MERGING TO MASTER
         exit(1)
     else:
         url_bugzilla = URL_BUGZILLA_DEV
+        bugzilla_username = BUGZILLA_DEV_USERNAME 
+        bugzilla_password = BUGZILLA_DEV_PASSWORD 
 
-    ticket = BugzillaRESTClient(
-        url_bugzilla, bugzilla_username, bugzilla_password
-    )
+    #ticket = BugzillaRESTClient(
+    #    url_bugzilla, bugzilla_username, bugzilla_password
+    #)
+    ticket = BugzillaRESTClient(url_bugzilla)
 
     bastion_username = os.environ["BASTION_USERNAME"]
     bastion_host = os.environ["BASTION_HOST"]
@@ -244,6 +260,7 @@ def stack_check(args=None):
         print('\nERROR: No instances found! ABORTING!\n')
         exit(1)
 
+
     for instance in instances:
 
         host_string = instance.public_dns_name
@@ -259,6 +276,17 @@ def stack_check(args=None):
                 )
                 result = check.main(manifest)
                 ticket.bug_update(application, result, bug_id)
+
+def url_check(args=None):
+
+    for environment, stack_label in environments.iteritems():
+        if stack_label in instance.tags["Stack"]:
+
+            check = UrlChecker(
+                application, environment, env_selected, test_manifest
+            )
+            result = check.main(manifest)
+            ticket.bug_update(application, result, bug_id)
 
 def loadtest(args=None):
     parser = argparse.ArgumentParser(

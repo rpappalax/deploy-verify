@@ -38,6 +38,7 @@ setup(
         'console_scripts': [
             'ticket = deploy_verify.main:ticket',
             'stack-check = deploy_verify.main:stack_check',
+            'url-check = deploy_verify.main:url_check',
             'e2e = deploy_verify.main:e2e_test',
             'loadtest = deploy_verify.main:loadtest',
         ]
