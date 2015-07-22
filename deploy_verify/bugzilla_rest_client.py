@@ -11,8 +11,6 @@ import json
 import requests
 from output_helper import OutputHelper
 
-#URL_BUGZILLA_PROD = 'https://bugzilla.mozilla.org'
-#URL_BUGZILLA_DEV = 'https://bugzilla-dev.allizom.org'
 PRODUCT_PROD = 'Cloud Services'
 PRODUCT_DEV = 'Mozilla Services'
 COMPONENT_PROD = 'Operations: Deployment Requests'
@@ -39,33 +37,29 @@ class InvalidCredentials(Exception):
 class BugzillaRESTClient(object):
     """"Used for CRUD operations against Bugzilla REST API"""
 
-    #def __init__(self, host, bugzilla_username, bugzilla_password):
-    def __init__(self, host):
+    def __init__(self, bugzilla_mozilla):
 
         self.output = OutputHelper()
-        self.host = host
-        #self.username = bugzilla_username
-        #self.password = bugzilla_password
-
+        self.bugzilla_mozilla = bugzilla_mozilla 
 
         # bugzilla-dev doesn't mirror the same components,
         # so we'll populate these conditionally
-        if 'dev' in host:
-            self.username = BUGZILLA_DEV_USERNAME
-            self.password = BUGZILLA_DEV_PASSWORD
-            self.bugzilla_product = PRODUCT_DEV
-            self.bugzilla_component = COMPONENT_DEV
-        else:
+        if bugzilla_mozilla:
             self.username = BUGZILLA_USERNAME
             self.password = BUGZILLA_PASSWORD
             self.bugzilla_product = PRODUCT_PROD
             self.bugzilla_component = COMPONENT_PROD
+            self.host = URL_BUGZILLA_PROD
+            # REMOVE WHEN MERGING TO MASTER
+            exit()
+        else:
+            self.username = BUGZILLA_DEV_USERNAME
+            self.password = BUGZILLA_DEV_PASSWORD
+            self.bugzilla_product = PRODUCT_DEV
+            self.bugzilla_component = COMPONENT_DEV
+            self.host = URL_BUGZILLA_DEV
 
-        #self.bugzilla_product = PRODUCT_DEV if 'dev' in host else PRODUCT_PROD
-        #self.bugzilla_component = COMPONENT_DEV if 'dev' in host else \
-        #    COMPONENT_PROD
-
-        self.token = self.get_token(host)
+        self.token = self.get_token(self.host)
 
     def _get_json_create(
         self, release_num, application,
@@ -260,13 +254,9 @@ class BugzillaRESTClient(object):
 
 def main():
 
-    # Example
-    bugzilla_username = 'johnnyquest@racebannon.com'
-    bugzilla_password = 'hadji_is_a_geek'
-    url_bugzilla = URL_BUGZILLA_DEV
-
     # Example: bug create
-    bz = BugzillaRESTClient(url_bugzilla, bugzilla_username, bugzilla_password)
+    bugzilla_mozilla = False
+    bz = BugzillaRESTClient(bugzilla_mozilla)
 
     bug_info = {
         'release_num': '0.18.0',
