@@ -43,7 +43,7 @@ def ticket(args=None):
 
     parser_create.add_argument(
         '-e', '--environment',
-        help='Enter: STAGE, PRODUCTION',
+        help='Enter: STAGE, PROD',
         default='STAGE',
         required=False)
 
@@ -84,7 +84,7 @@ def ticket(args=None):
 
     if all(key in args for key in ['repo_owner', 'application', 'environment']):
         repo_owner = args['repo_owner']
-        environment = args['environment']
+        environment = args['environment'].lower()
         if args['cc_mail']:
             cc_mail = args['cc_mail']
         else:
@@ -152,7 +152,7 @@ def stack_check(args=None):
     )
     parser.add_argument(
         '-e', '--environment',
-        help='Enter: STAGE, PRODUCTION',
+        help='Enter: STAGE, PROD',
         default='STAGE',
         required=False
     )
@@ -175,7 +175,7 @@ def stack_check(args=None):
     application = args['application']
     region = args['region']
     tag_num = args['tag_num']
-    environment = args['environment']
+    environment = args['environment'].lower()
     bug_id = args['deployment_ticket_id']
     bugzilla_mozilla = args['bugzilla_mozilla']
 
@@ -190,61 +190,45 @@ def stack_check(args=None):
     test_manifest = TestManifest(application)
     manifest = test_manifest.manifest(application)
     environments = test_manifest.environments(manifest, environment)
-    region = test_manifest.region(manifest, environment)
    
-    ec2 = EC2Handler()
 
     # TODO: add region conditionally as a filter element 
     filters = {
         'tag:Type': application.replace('-', '_')
     }
     server_count = len(environments) 
+    """
     instances = ec2.instances_newest(region, filters)[:server_count]
 
     if len(instances)==0:
         print('\nERROR: No instances found! ABORTING!\n')
         exit(1)
-
     """
-    for instance in instances:
 
-        result= ''
-        host_string = instance.public_dns_name
-        instance_properties = ec2.instance_properties(region, instance)
-
-        for environment, stack_label in environments.iteritems():
-            # stack check
-            if stack_label in instance.tags["Stack"]:
-                check = HostChecker(
-                    bastion_host_uri, application,
-                    tag_num, environment, host_string, instance_properties,
-                    test_manifest
-                )
-                result = check.main(manifest)
-
-            # url check
-            check = UrlChecker(
-                application, environment, test_manifest
-            )
-            result += check.main(manifest)
-            ticket.bug_update(application, result, bug_id)
-    """
     for environment, stack_label in environments.iteritems():
 
         result= ''
+        if environment != 'prod':
+            ec2 = EC2Handler()
+            region = test_manifest.region(manifest, environment)
+            instances = ec2.instances_newest(region, filters)[:server_count]
 
-        # stack check
-        for instance in instances:
+            if len(instances)==0:
+                print('\nERROR: No instances found! ABORTING!\n')
+                exit(1)
 
-            host_string = instance.public_dns_name
-            instance_properties = ec2.instance_properties(region, instance)
-            if stack_label in instance.tags["Stack"]:
-                check = HostChecker(
-                    bastion_host_uri, application,
-                    tag_num, environment, host_string, instance_properties,
-                    test_manifest
-                )
-                result = check.main(manifest)
+            # stack check
+            for instance in instances:
+
+                host_string = instance.public_dns_name
+                instance_properties = ec2.instance_properties(region, instance)
+                if stack_label in instance.tags["Stack"]:
+                    check = HostChecker(
+                        bastion_host_uri, application,
+                        tag_num, environment, host_string, instance_properties,
+                        test_manifest
+                    )
+                    result = check.main(manifest)
 
         # url check
         check = UrlChecker(

@@ -208,7 +208,7 @@ class HostChecker(object):
         # out += 'PACKAGE VERSION\n\n'
         # out += str(self.package_version())
 
-        if 'processes' in manifest and env_selected != 'PRODUCTION':
+        if 'processes' in manifest and env_selected != 'prod':
             out += 'PROCESS CHECK\n\n'
             out += str(self.verify_processes(manifest))
 

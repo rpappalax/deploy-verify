@@ -24,7 +24,7 @@ class UrlChecker(object):
 
         import requests
         out = ''
-
+ 
         try:
             response = requests.get(url, timeout=REQUEST_TIMEOUT)
             response_time = requests.get(url).elapsed.total_seconds() 

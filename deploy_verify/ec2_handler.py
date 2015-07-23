@@ -88,18 +88,18 @@ def main():
     ec2 = EC2Handler()
     parser = argparse.ArgumentParser()
     parser.add_argument('-r', '--region')
-    parser.add_argument('-p', '--product-name',
-                        help='Product Name (i.e. loop-client)')
+    parser.add_argument('-a', '--application',
+                        help='Application (i.e. loop-client)')
     args = parser.parse_args()
 
-    product_name = args.product_name
+    application = args.application
 
     if args.region:
         regions = []
         regions.append(args.region)
 
     filters = {
-        'tag:Type': product_name.replace('-', '_')
+        'tag:Type': application.replace('-', '_')
     }
 
     for region in regions:
