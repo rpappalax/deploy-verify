@@ -4,7 +4,7 @@ from deploy_verify.bugzilla_rest_client import BugzillaRESTClient
 from deploy_verify.release_notes import ReleaseNotes
 from deploy_verify.ec2_handler import EC2Handler
 from deploy_verify.test_manifest import TestManifest 
-from deploy_verify.stack_checker import StackChecker
+from deploy_verify.host_checker import HostChecker
 from deploy_verify.url_checker import UrlChecker
 from output_helper import OutputHelper
 
@@ -73,19 +73,6 @@ def ticket(args=None):
 
     application = args['application']
     bugzilla_mozilla = args['bugzilla_mozilla']
-
-    """
-    if args['bugzilla_mozilla']:
-        url_bugzilla = URL_BUGZILLA_PROD
-        bugzilla_username = BUGZILLA_USERNAME 
-        bugzilla_password = BUGZILLA_PASSWORD 
-        # REMOVE WHEN MERGING TO MASTER
-        exit(1)
-    else:
-        url_bugzilla = URL_BUGZILLA_DEV
-        bugzilla_username = BUGZILLA_DEV_USERNAME 
-        bugzilla_password = BUGZILLA_DEV_PASSWORD 
-    """
 
     ticket = BugzillaRESTClient(bugzilla_mozilla)
 
@@ -218,33 +205,57 @@ def stack_check(args=None):
         print('\nERROR: No instances found! ABORTING!\n')
         exit(1)
 
-
+    """
     for instance in instances:
 
+        result= ''
         host_string = instance.public_dns_name
         instance_properties = ec2.instance_properties(region, instance)
 
         for environment, stack_label in environments.iteritems():
+            # stack check
             if stack_label in instance.tags["Stack"]:
-
-                check = StackChecker(
+                check = HostChecker(
                     bastion_host_uri, application,
                     tag_num, environment, host_string, instance_properties,
                     test_manifest
                 )
                 result = check.main(manifest)
-                ticket.bug_update(application, result, bug_id)
 
-def url_check(args=None):
-
-    for environment, stack_label in environments.iteritems():
-        if stack_label in instance.tags["Stack"]:
-
+            # url check
             check = UrlChecker(
-                application, environment, env_selected, test_manifest
+                application, environment, test_manifest
             )
-            result = check.main(manifest)
+            result += check.main(manifest)
             ticket.bug_update(application, result, bug_id)
+    """
+    for environment, stack_label in environments.iteritems():
+
+        result= ''
+
+        # stack check
+        for instance in instances:
+
+            host_string = instance.public_dns_name
+            instance_properties = ec2.instance_properties(region, instance)
+            if stack_label in instance.tags["Stack"]:
+                check = HostChecker(
+                    bastion_host_uri, application,
+                    tag_num, environment, host_string, instance_properties,
+                    test_manifest
+                )
+                result = check.main(manifest)
+
+        # url check
+        check = UrlChecker(
+            application, environment, test_manifest
+        )
+        result += check.main(manifest)
+        if result:
+            ticket.bug_update(application, result, bug_id)
+        else:
+            print('>>>ERROR: no result!<<<')
+            exit()
 
 def loadtest(args=None):
     parser = argparse.ArgumentParser(
@@ -261,6 +272,35 @@ def loadtest(args=None):
 
     # args = vars(parser.parse_args())
 
+def e2e_test(args=None):
+    parser = argparse.ArgumentParser(
+        description='Run e2e test for final STAGE verification',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
+
+    parser.add_argument(
+        '-t', '--test',
+        help='Example: this is placeholder text',
+        default='hello e2e',
+        required=False
+    )
+
+    # args = vars(parser.parse_args())
+
+def loadtest(args=None):
+    parser = argparse.ArgumentParser(
+        description='Run loadtest to verify scalability (STAGE only)',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter
+    )
+
+    parser.add_argument(
+        '-t', '--test',
+        help='Example: this is placeholder text',
+        default='hello loadtest',
+        required=False
+    )
+
+    # args = vars(parser.parse_args())
 
 def e2e_test(args=None):
     parser = argparse.ArgumentParser(

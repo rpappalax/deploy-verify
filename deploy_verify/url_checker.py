@@ -16,7 +16,7 @@ class UrlChecker(object):
 
         if env:
             env = '({0})'.format(env.upper())
-        label = 'STACK CHECK {0}'.format(env)
+        label = 'URL CHECKS {0}'.format(env)
         return '{0}\n{1}\n{2}\n\n'.format(LINE, label, LINE)
 
     def _http_request(self, url):
@@ -78,7 +78,6 @@ class UrlChecker(object):
         environment = self.env_selected
         out += self._header_label(environment)
 
-        out += 'URL CHECKS\n\n'
         urls = self.test_manifest.urls(manifest, env_selected)
         out += self.verify_urls(urls)
 

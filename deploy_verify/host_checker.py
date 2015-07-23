@@ -10,7 +10,7 @@ class FabricException(Exception):
     pass
 
 
-class StackChecker(object):
+class HostChecker(object):
 
     def __init__(
         self, jump_host_uri, application, tag_num,
@@ -38,7 +38,7 @@ class StackChecker(object):
 
         if env:
             env = '({0})'.format(env.upper())
-        label = 'STACK CHECK {0}'.format(env)
+        label = 'HOST CHECKS {0}'.format(env)
         return '{0}\n{1}\n{2}\n\n'.format(LINE, label, LINE)
 
     def _http_request(self, url):
@@ -190,15 +190,6 @@ class StackChecker(object):
         out += run(cmd) + '\n\n'
         return out
 
-    def verify_urls(self, urls):
-
-        out = ''
-        for url in urls:
-            # TODO: iterate thru protocols
-            out += '{0}:\n'.format(url)
-            out += str(self._http_request(url))
-        return out + '\n\n'
-
     def diskspace(self):
 
         # Use to check disk space before / after loadtest
@@ -220,10 +211,6 @@ class StackChecker(object):
         if 'processes' in manifest and env_selected != 'PRODUCTION':
             out += 'PROCESS CHECK\n\n'
             out += str(self.verify_processes(manifest))
-
-        out += 'URL CHECKS\n\n'
-        urls = self.test_manifest.urls(manifest, env_selected)
-        out += self.verify_urls(urls)
 
         if 'commands' in manifest:
             out += str(self.verify_commands(manifest, environment))
@@ -250,8 +237,7 @@ if __name__ == '__main__':
     ec2 = EC2Handler()
     host_string = '<elb_host_string_here.compute.amazonaws.com>'
 
-    checker = StackChecker(
-        bastion_host_uri, application, tag_num, host_string)
+    checker = HostChecker(bastion_host_uri, application, tag_num, host_string)
 
     print '================'
     checker.main()
