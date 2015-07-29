@@ -107,17 +107,12 @@ def ticket(args=None):
 def stack_check(args=None):
     """Verify newly deployed stack and update bug with verification results
 
-    TODO:
-        Ops Jenkins must call stack-check with the id of the deployment bug.
-        We should add bug_search by default, then options below become
-        unnecessary
+    Note:
+        By default, stack_check will look for latest bug creation time for 
+    matching application string.
 
-        option #1:
-            (implemented here) We grab the latest instance(s) and
-            assume that's the one we want to test
-        option #2:
-            Ops Jenkins hands us off the DNS of the newly deployed stack
-            as an input param
+    To pass in a specific bug num, Ops Jenkins would call stack-check with 
+    the id of the deployment bug.  
 
         From Ops Jenkins:
         /var/log/initial_puppet_apply.log
@@ -197,13 +192,6 @@ def stack_check(args=None):
         'tag:Type': application.replace('-', '_')
     }
     server_count = len(environments) 
-    """
-    instances = ec2.instances_newest(region, filters)[:server_count]
-
-    if len(instances)==0:
-        print('\nERROR: No instances found! ABORTING!\n')
-        exit(1)
-    """
 
     for environment, stack_label in environments.iteritems():
 

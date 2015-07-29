@@ -50,15 +50,12 @@ class BugzillaRESTClient(object):
             self.bugzilla_product = PRODUCT_PROD
             self.bugzilla_component = COMPONENT_PROD
             self.host = URL_BUGZILLA_PROD
-            # REMOVE WHEN MERGING TO MASTER
-            exit()
         else:
             self.username = BUGZILLA_DEV_USERNAME
             self.password = BUGZILLA_DEV_PASSWORD
             self.bugzilla_product = PRODUCT_DEV
             self.bugzilla_component = COMPONENT_DEV
             self.host = URL_BUGZILLA_DEV
-
         self.token = self.get_token(self.host)
 
     def _get_json_create(
