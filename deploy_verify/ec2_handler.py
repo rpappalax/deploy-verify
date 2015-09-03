@@ -99,13 +99,12 @@ def main():
         regions.append(args.region)
 
     filters = {
-        'tag:Type': application.replace('-', '_')
+        'tag:App': application.replace('-', '_')
     }
+    print 'hello'
 
     for region in regions:
         instances = ec2.instances_newest(region, filters)
-        print instances
-        exit()
         for instance in instances:
             print('--------------------')
             print(ec2.instance_properties(region, instance))

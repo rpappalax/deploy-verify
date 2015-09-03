@@ -64,8 +64,15 @@ class BugzillaRESTClient(object):
     ):
         """Returns bugzilla JSON string to POST to REST API."""
 
-        short_desc = '[deployment] {0} {1} - {2}'.format(
-            application, release_num, environment)
+        #short_desc = '[deployment] {0} {1} - {2}'.format(
+        #    application, release_num, environment)
+        if environment == 'prod':
+            environment = 'PRODUCTION'
+        short_desc = 'Please deploy {1} {0} to {2}'.format(
+            release_num, 
+            application, 
+            environment.upper()
+        )
 
         data = {
             'product': self.bugzilla_product,

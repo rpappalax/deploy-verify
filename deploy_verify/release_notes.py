@@ -209,6 +209,7 @@ class ReleaseNotes(object):
         self.output.log('Retrieve all tags', True)
         start = len(tags) - self._max_comparisons
         tags_unsorted = []
+
         for i in range(len(tags)):
             tag = self._parse_tag(tags[i])
             tags_unsorted.append(tag)

@@ -189,7 +189,7 @@ def stack_check(args=None):
 
     # TODO: add region conditionally as a filter element 
     filters = {
-        'tag:Type': application.replace('-', '_')
+        'tag:App': application.replace('-', '_')
     }
     server_count = len(environments) 
 
